@@ -1,4 +1,5 @@
 use crate::{FilePath, FolderPath, Path};
+use std::ffi::OsStr;
 
 impl Path {
     //! AsRef
@@ -18,6 +19,12 @@ impl AsRef<str> for Path {
 impl AsRef<std::path::Path> for Path {
     fn as_ref(&self) -> &std::path::Path {
         self.path().as_ref()
+    }
+}
+
+impl AsRef<OsStr> for Path {
+    fn as_ref(&self) -> &OsStr {
+        OsStr::new(self.as_str())
     }
 }
 
@@ -42,6 +49,12 @@ impl AsRef<std::path::Path> for FilePath {
     }
 }
 
+impl AsRef<OsStr> for FilePath {
+    fn as_ref(&self) -> &OsStr {
+        OsStr::new(self.as_str())
+    }
+}
+
 impl FolderPath {
     //! AsRef
 
@@ -60,6 +73,12 @@ impl AsRef<str> for FolderPath {
 impl AsRef<std::path::Path> for FolderPath {
     fn as_ref(&self) -> &std::path::Path {
         self.path().as_ref()
+    }
+}
+
+impl AsRef<OsStr> for FolderPath {
+    fn as_ref(&self) -> &OsStr {
+        OsStr::new(self.as_str())
     }
 }
 
