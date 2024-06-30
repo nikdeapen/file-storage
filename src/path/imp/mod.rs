@@ -1,0 +1,9 @@
+mod append;
+mod append_char;
+mod as_ref;
+mod base_and_extension;
+mod compare;
+mod construction;
+mod conversions;
+mod file_or_folder;
+mod make_file_folder;
