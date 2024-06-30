@@ -88,7 +88,7 @@ mod tests {
         let path: Path = Path::unix_root();
         let result: FolderPath = path.make_folder();
         let expected: &str = "/";
-        assert_eq!(result.as_ref(), expected);
+        assert_eq!(result.as_str(), expected);
     }
 
     #[test]
@@ -96,7 +96,7 @@ mod tests {
         let file: FilePath = Path::unix_root().make_file("file_name").unwrap();
         let result: FolderPath = file.make_folder();
         let expected: &str = "/file_name/";
-        assert_eq!(result.as_ref(), expected);
+        assert_eq!(result.as_str(), expected);
     }
 
     #[test]

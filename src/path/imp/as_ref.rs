@@ -15,6 +15,12 @@ impl AsRef<str> for Path {
     }
 }
 
+impl AsRef<std::path::Path> for Path {
+    fn as_ref(&self) -> &std::path::Path {
+        self.path().as_ref()
+    }
+}
+
 impl FilePath {
     //! AsRef
 
@@ -27,6 +33,12 @@ impl FilePath {
 impl AsRef<str> for FilePath {
     fn as_ref(&self) -> &str {
         self.as_str()
+    }
+}
+
+impl AsRef<std::path::Path> for FilePath {
+    fn as_ref(&self) -> &std::path::Path {
+        self.path().as_ref()
     }
 }
 
@@ -45,6 +57,12 @@ impl AsRef<str> for FolderPath {
     }
 }
 
+impl AsRef<std::path::Path> for FolderPath {
+    fn as_ref(&self) -> &std::path::Path {
+        self.path().as_ref()
+    }
+}
+
 #[cfg(test)]
 #[cfg(feature = "local")]
 mod tests {
@@ -54,20 +72,35 @@ mod tests {
     fn path_as_ref() {
         let path: Path = Path::unix_root().with_appended("path");
         assert_eq!(path.as_str(), "/path");
-        assert_eq!(path.as_ref(), "/path");
+
+        let result: &str = path.as_ref();
+        assert_eq!(result, "/path");
+
+        let result: &std::path::Path = path.as_ref();
+        assert_eq!(result.as_os_str().to_str().unwrap(), "/path");
     }
 
     #[test]
     fn file_as_ref() {
         let path: FilePath = Path::unix_root().make_file("path").unwrap();
         assert_eq!(path.as_str(), "/path");
-        assert_eq!(path.as_ref(), "/path");
+
+        let result: &str = path.as_ref();
+        assert_eq!(result, "/path");
+
+        let result: &std::path::Path = path.as_ref();
+        assert_eq!(result.as_os_str().to_str().unwrap(), "/path");
     }
 
     #[test]
     fn folder_as_ref() {
         let path: FolderPath = Path::unix_root().make_folder();
         assert_eq!(path.as_str(), "/");
-        assert_eq!(path.as_ref(), "/");
+
+        let result: &str = path.as_ref();
+        assert_eq!(result, "/");
+
+        let result: &std::path::Path = path.as_ref();
+        assert_eq!(result.as_os_str().to_str().unwrap(), "/");
     }
 }
