@@ -17,3 +17,6 @@ mod local_file_read;
 mod local_file_write;
 mod read_if_exists;
 mod write_if_not_exists;
+
+#[cfg(test)]
+mod tests;
