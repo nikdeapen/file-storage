@@ -9,5 +9,8 @@ authors = ["Nik Deapen <nik@deapen.com>"]
 edition = "2021"
 license = "MIT"
 
+[dependencies]
+tempfile = { version = "3.10.1", optional = true }
+
 [features]
-local = []
+local = ["tempfile"]
