@@ -5,6 +5,7 @@ mod base_extension;
 mod clone_with_capacity;
 mod compare;
 mod conversions;
+mod display;
 mod file_name;
 mod is_file_folder;
 mod roots;
