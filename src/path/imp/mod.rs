@@ -14,5 +14,6 @@ mod roots;
 mod truncate;
 
 mod parse;
+mod rebase;
 #[cfg(feature = "local-temp")]
 mod temp;
