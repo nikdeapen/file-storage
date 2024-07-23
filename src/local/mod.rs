@@ -1,3 +1,4 @@
+pub use delete::*;
 pub use exists::*;
 pub use is_local_path::*;
 pub use list_files::*;
@@ -7,6 +8,7 @@ pub use local_list_files::*;
 pub use read::*;
 pub use write::*;
 
+mod delete;
 mod exists;
 mod is_local_path;
 mod list_files;
