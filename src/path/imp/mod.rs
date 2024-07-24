@@ -13,6 +13,7 @@ mod make_file_folder;
 mod roots;
 mod truncate;
 
+mod len;
 mod parse;
 mod rebase;
 #[cfg(feature = "local-temp")]
