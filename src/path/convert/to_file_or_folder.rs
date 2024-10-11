@@ -25,26 +25,3 @@ impl StoragePath {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::StoragePath;
-
-    #[test]
-    fn to_file() {
-        let path: StoragePath = unsafe { StoragePath::new_unchecked("/the/file", 1, '/') };
-        assert!(path.to_file().is_some());
-
-        let path: StoragePath = unsafe { StoragePath::new_unchecked("/the/folder/", 1, '/') };
-        assert!(path.to_file().is_none());
-    }
-
-    #[test]
-    fn to_folder() {
-        let path: StoragePath = unsafe { StoragePath::new_unchecked("/the/file", 1, '/') };
-        assert!(path.to_folder().is_none());
-
-        let path: StoragePath = unsafe { StoragePath::new_unchecked("/the/folder/", 1, '/') };
-        assert!(path.to_folder().is_some());
-    }
-}

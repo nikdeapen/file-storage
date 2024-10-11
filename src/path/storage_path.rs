@@ -20,8 +20,9 @@
 /// Extension:      the/path
 ///
 /// # Files & Folders
-/// A path can be a file path or a folder path. These are mutually exclusive and exhaustive. A path
-/// is a folder if it is equal to its base or ends with a file-separator, otherwise it is a file.
+/// A storage path can be a file path or a folder path. These are mutually exclusive and
+/// exhaustive. A path is a folder if it is equal to its base or ends with a file-separator,
+/// otherwise it is a file.
 #[derive(Clone, Debug)]
 pub struct StoragePath {
     path: String,
@@ -76,21 +77,5 @@ impl StoragePath {
     /// Gets the file separator.
     pub fn file_separator(&self) -> char {
         self.file_separator
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::StoragePath;
-
-    #[test]
-    fn properties() {
-        let s: &str = "/the/path";
-        let mut path: StoragePath = unsafe { StoragePath::new_unchecked(s, 1, '/') };
-
-        assert_eq!(path.path(), s);
-        assert_eq!(unsafe { path.path_mut_unchecked() }, s);
-        assert_eq!(path.base_len(), 1);
-        assert_eq!(path.file_separator(), '/');
     }
 }

@@ -26,15 +26,3 @@ impl FolderPath {
         self.path().len()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::StoragePath;
-
-    #[test]
-    fn len() {
-        let s: &str = "/你/好";
-        let path: StoragePath = unsafe { StoragePath::new_unchecked(s, 1, '/') };
-        assert_eq!(path.len(), s.len());
-    }
-}

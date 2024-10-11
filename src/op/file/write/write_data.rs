@@ -13,7 +13,7 @@ impl FilePath {
     where
         D: AsRef<[u8]>,
     {
-        if self.write_data_if_not_exists(data.as_ref())? {
+        if self.write_data_if_not_exists(data)? {
             Ok(())
         } else {
             Err(Error::new(self, Write, FileAlreadyExists))

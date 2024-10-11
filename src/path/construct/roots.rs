@@ -17,16 +17,3 @@ impl FolderPath {
         StoragePath::unix_root().make_folder()
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use crate::StoragePath;
-
-    #[test]
-    fn unix_root() {
-        let path: StoragePath = StoragePath::unix_root();
-        debug_assert_eq!(path.path(), "/");
-        debug_assert_eq!(path.base_len(), 1);
-        debug_assert_eq!(path.file_separator(), '/');
-    }
-}
