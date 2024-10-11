@@ -64,12 +64,12 @@ impl Error {
 impl Error {
     //! Errors
 
-    /// Gets the `path not UTF-8` error.
+    /// Gets the error for non UTF-8 encoded paths.
     pub fn path_not_utf8() -> io::Error {
         io::Error::new(ErrorKind::Unsupported, "path is not UTF-8")
     }
 
-    /// Gets the `unsupported file system` error.
+    /// Gets the error for unsupported file systems.
     pub fn unsupported_file_system(path: &str) -> io::Error {
         io::Error::new(
             ErrorKind::Unsupported,

@@ -23,7 +23,7 @@ where
     if s.len() < 3 {
         false
     } else {
-        s.as_bytes()[0].is_ascii_uppercase()
+        s.as_bytes()[0].is_ascii_alphabetic()
             && s.as_bytes()[1] == b':'
             && (s.as_bytes()[2] == b'\\' || s.as_bytes()[2] == b'/')
     }

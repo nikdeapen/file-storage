@@ -6,11 +6,11 @@ use crate::Reason::UnknownFileSystem;
 use crate::{Error, FilePath};
 
 impl FilePath {
-    //! Read To Vec If Exists
+    //! Read to Vec If Exists
 
-    /// Reads the file into the `target` vec.
+    /// Reads the file to the `target` `Vec` if it exists.
     ///
-    /// Returns `Ok(Some(count))` with the number of bytes read.
+    /// Returns `Ok(Some(file_content_len))`.
     /// Returns `Ok(None)` if the file did not exist.
     pub fn read_to_vec_if_exists(&self, target: &mut Vec<u8>) -> Result<Option<usize>, Error> {
         if self.is_local_path() {
@@ -22,9 +22,9 @@ impl FilePath {
 }
 
 impl FilePath {
-    //! Read To Vec If Exists - Local
+    //! Read to Vec If Exists - Local
 
-    pub fn read_to_vec_if_exists_local(
+    fn read_to_vec_if_exists_local(
         &self,
         mut target: &mut Vec<u8>,
     ) -> Result<Option<usize>, Error> {
