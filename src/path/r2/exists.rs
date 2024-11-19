@@ -1,8 +1,8 @@
+use crate::path::r2::R2Path;
 use crate::Error;
 use crate::Operation::Exists;
 
-#[cfg(feature = "r2")]
-impl<'a> crate::r2::R2Path<'a> {
+impl<'a> R2Path<'a> {
     //! Exists
 
     /// See `FilePath::exist`.
