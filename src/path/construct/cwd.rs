@@ -12,7 +12,7 @@ impl FolderPath {
         if let Some(path) = path.to_str() {
             Ok(StoragePath::parse(path)?.make_folder())
         } else {
-            Err(Error::path_not_utf8())
+            Err(Error::path_not_utf8(path))
         }
     }
 }

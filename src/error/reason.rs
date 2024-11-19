@@ -9,7 +9,7 @@ pub enum Reason {
     /// The file system does not support the operation.
     OperationNotSupported,
 
-    /// The file was not found. (this can also mean it unauthorized)
+    /// The file was not found. (this can also mean unauthorized)
     FileNotFound,
 
     /// The file already exists.
@@ -21,6 +21,13 @@ pub enum Reason {
 
 impl Display for Reason {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        let s: &str = match self {
+            Reason::UnknownFileSystem => "unknown file system",
+            Reason::OperationNotSupported => "operation not supported",
+            Reason::FileNotFound => "file not found",
+            Reason::FileAlreadyExists => "file already exists",
+            Reason::Other => "other",
+        };
+        write!(f, "{}", s)
     }
 }

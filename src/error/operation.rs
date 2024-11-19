@@ -24,6 +24,14 @@ pub enum Operation {
 
 impl Display for Operation {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
+        let s: &str = match self {
+            Operation::Exists => "exists",
+            Operation::Read => "read",
+            Operation::Write => "write",
+            Operation::Delete => "delete",
+            Operation::ListFiles => "list-files",
+            Operation::DeleteFiles => "delete-files",
+        };
+        write!(f, "{}", s)
     }
 }

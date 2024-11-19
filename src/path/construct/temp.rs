@@ -3,7 +3,7 @@ use std::io::ErrorKind::InvalidData;
 
 use tempfile::NamedTempFile;
 
-use crate::{FilePath, FolderPath, StoragePath};
+use crate::{Error, FilePath, FolderPath, StoragePath};
 
 impl FilePath {
     //! Temp File
@@ -13,13 +13,12 @@ impl FilePath {
         let temp: NamedTempFile = NamedTempFile::new()?;
         if let Some(temp) = temp.path().to_str() {
             let path: StoragePath = StoragePath::parse(temp)?;
-            let file: Self = path.make_file("temp.file").ok_or(io::Error::new(
-                InvalidData,
-                "'e' is a file separator ¯\\_(ツ)_/¯",
-            ))?;
+            let file: Self = path.make_file("temp.file").ok_or_else(|| {
+                io::Error::new(InvalidData, "'e' is a file separator ¯\\_(ツ)_/¯")
+            })?;
             Ok(file)
         } else {
-            Err(io::Error::new(InvalidData, "temp file not UTF-8"))
+            Err(Error::path_not_utf8(temp.path().to_path_buf()))
         }
     }
 }
@@ -36,7 +35,7 @@ impl FolderPath {
             let path: StoragePath = StoragePath::parse(s)?;
             Ok(path.make_folder())
         } else {
-            Err(io::Error::new(InvalidData, "temp file not UTF-8"))
+            Err(Error::path_not_utf8(temp.path().to_path_buf()))
         }
     }
 }

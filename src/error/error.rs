@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter};
 use std::io;
 use std::io::ErrorKind;
+use std::path::PathBuf;
 
 use crate::Reason::Other;
 use crate::StoragePath;
@@ -33,7 +34,7 @@ impl Error {
     }
 
     /// Creates an error from the `cause`.
-    pub fn from_error<P, E>(path: P, operation: Operation, cause: E) -> Self
+    pub fn from_cause<P, E>(path: P, operation: Operation, cause: E) -> Self
     where
         P: Into<StoragePath>,
         E: Into<io::Error>,
@@ -53,7 +54,7 @@ impl Error {
         P: Into<StoragePath>,
         S: Into<String>,
     {
-        Error::from_error(
+        Error::from_cause(
             path,
             operation,
             io::Error::new(ErrorKind::Other, message.into()),
@@ -62,18 +63,21 @@ impl Error {
 }
 
 impl Error {
-    //! Errors
+    //! Common IO Errors
 
-    /// Gets the error for non UTF-8 encoded paths.
-    pub fn path_not_utf8() -> io::Error {
-        io::Error::new(ErrorKind::Unsupported, "path is not UTF-8")
+    /// Gets the `unknown file system` error.
+    pub fn unknown_file_system(path: &str) -> io::Error {
+        io::Error::new(
+            ErrorKind::Other,
+            format!("unknown file system for path: {}", path),
+        )
     }
 
-    /// Gets the error for unsupported file systems.
-    pub fn unsupported_file_system(path: &str) -> io::Error {
+    /// Gets the `path not utf-8` error.
+    pub fn path_not_utf8(path: PathBuf) -> io::Error {
         io::Error::new(
-            ErrorKind::Unsupported,
-            format!("unsupported file system for path: {}", path),
+            ErrorKind::InvalidInput,
+            format!("path not utf-8: {:?}", path),
         )
     }
 }
