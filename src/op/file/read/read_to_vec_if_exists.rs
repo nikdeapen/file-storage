@@ -22,7 +22,6 @@ impl FilePath {
             return path.read_to_vec_if_exists(target);
         }
 
-        #[cfg(feature = "r2")]
         Err(Error::new(self.clone(), Read, UnknownFileSystem))
     }
 }
