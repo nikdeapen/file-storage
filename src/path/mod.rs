@@ -14,3 +14,6 @@ mod core;
 mod mutate;
 mod properties;
 mod system;
+
+#[cfg(feature = "r2")]
+pub(crate) mod r2;
