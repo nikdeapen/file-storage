@@ -8,6 +8,7 @@ mod folder_path;
 mod storage_path;
 mod util;
 
+mod construct;
 mod convert;
 mod core;
 mod mutate;
