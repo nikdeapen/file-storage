@@ -6,5 +6,6 @@ mod file_path;
 mod folder_path;
 mod storage_path;
 
+mod convert;
+mod core;
 mod properties;
-mod value;
