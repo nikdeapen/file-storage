@@ -13,6 +13,11 @@ impl FilePath {
             return self.delete_if_exists().map(|_| ());
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(path) = crate::R2Path::parse(self.path()) {
+            return path.delete();
+        }
+
         Err(Error::new(self.clone(), Delete, UnknownFileSystem))
     }
 }
