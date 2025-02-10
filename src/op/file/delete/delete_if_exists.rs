@@ -14,6 +14,15 @@ impl FilePath {
             return local.delete_if_exists();
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(_r2) = crate::R2Path::from(self.path()) {
+            return Err(Error::new(
+                self.clone(),
+                Delete,
+                Reason::OperationNotSupported,
+            ));
+        }
+
         Err(Error::new(self.clone(), Delete, Reason::UnknownFileSystem))
     }
 }
