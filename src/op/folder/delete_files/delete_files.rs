@@ -14,6 +14,11 @@ impl FolderPath {
             return local.delete_files();
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(r2) = crate::system::R2Path::from(self.path()) {
+            return r2.delete_files();
+        }
+
         Err(Error::new(self.clone(), ListFiles, UnknownFileSystem))
     }
 }

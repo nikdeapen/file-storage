@@ -13,7 +13,7 @@ impl FolderPath {
         if let Some(r2) = crate::R2Path::from(self.path()) {
             return r2.list_files_to_vec(target);
         }
-        
+
         let original_len: usize = target.len();
         let file_count: usize = self.list_files_to_vec_unsorted(target)?;
         let slice: &mut [FilePath] = &mut target.as_mut_slice()[original_len..];
