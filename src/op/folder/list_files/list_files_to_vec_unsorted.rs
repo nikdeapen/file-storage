@@ -14,6 +14,11 @@ impl FolderPath {
             return local.list_files_to_vec_unsorted(target);
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(r2) = crate::R2Path::from(self.path()) {
+            return r2.list_files_to_vec(target);
+        }
+
         Err(Error::new(self.clone(), ListFiles, UnknownFileSystem))
     }
 }
