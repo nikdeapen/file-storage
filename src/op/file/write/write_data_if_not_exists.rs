@@ -18,6 +18,11 @@ impl FilePath {
             return local.write_data_if_not_exists(data);
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(r2) = crate::R2Path::from(self.path()) {
+            return r2.write_data_if_not_exists(data);
+        }
+
         Err(Error::new(self.clone(), Write, UnknownFileSystem))
     }
 }
