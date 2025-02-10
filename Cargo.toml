@@ -1,0 +1,10 @@
+[package]
+name = "file-storage"
+version = "0.0.0"
+description = "This library aids in accessing file-like storage."
+readme = "README.md"
+repository = "https://github.com/nikdeapen/file-storage"
+homepage = "https://github.com/nikdeapen/file-storage"
+authors = ["Nik Deapen <nik@deapen.com>"]
+edition = "2021"
+license = "MIT"
