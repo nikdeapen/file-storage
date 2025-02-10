@@ -15,6 +15,11 @@ impl FilePath {
             return local.read_to_vec_if_exists(target);
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(r2) = crate::R2Path::from(self.path()) {
+            return r2.read_to_vec_if_exists(target);
+        }
+
         Err(Error::new(self.clone(), Read, UnknownFileSystem))
     }
 }
