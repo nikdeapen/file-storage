@@ -71,7 +71,7 @@ impl<'a> LocalPath<'a> {
             if path.starts_with(self.path.as_str()) {
                 let extension: &str = &path[self.path.len()..];
                 let file_path: StoragePath = self.path.clone_append(extension);
-                if let Some(file_path) = file_path.to_file() {
+                if let Ok(file_path) = file_path.to_file() {
                     Ok(file_path)
                 } else {
                     Err(Error::from_message(

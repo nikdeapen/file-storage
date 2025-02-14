@@ -11,7 +11,7 @@ impl<'a> R2Path<'a> {
     //! Write
 
     /// See `FilePath::write_data_if_not_exists`.
-    pub fn write_data_if_not_exists<D>(&self, data: D) -> Result<bool, Error>
+    pub fn write_slice_if_not_exists<D>(&self, data: D) -> Result<bool, Error>
     where
         D: AsRef<[u8]>,
     {
@@ -23,7 +23,7 @@ impl<'a> R2Path<'a> {
             .block_on(self.write_data_if_not_exists_async(data))
     }
 
-    /// See `R2Path::write_data_if_not_exists`.
+    /// See `FilePath::write_data_if_not_exists`.
     pub async fn write_data_if_not_exists_async<D>(&self, data: D) -> Result<bool, Error>
     where
         D: AsRef<[u8]>,

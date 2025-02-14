@@ -18,7 +18,7 @@ impl<'a> R2Path<'a> {
             .block_on(self.read_to_vec_if_exists_async(target))
     }
 
-    /// See `R2Path::read_to_vec_if_exists`.
+    /// See `FilePath::read_to_vec_if_exists`.
     pub async fn read_to_vec_if_exists_async(
         &self,
         target: &mut Vec<u8>,

@@ -8,7 +8,7 @@ impl<'a> LocalPath<'a> {
     //! Local
 
     /// See `FilePath::write_data_if_not_exists`.
-    pub fn write_data_if_not_exists<D>(&self, data: D) -> Result<bool, Error>
+    pub fn write_slice_if_not_exists<D>(&self, data: D) -> Result<bool, Error>
     where
         D: AsRef<[u8]>,
     {

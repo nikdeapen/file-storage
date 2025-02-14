@@ -3,7 +3,7 @@ use crate::StoragePath;
 impl StoragePath {
     //! Truncate
 
-    /// Truncates the path to the new length.
+    /// Truncates the path to the `new_len`.
     ///
     /// # Unsafe
     /// The `new_len` must be >= to the `base_len` and must be a valid char boundary.
@@ -14,7 +14,7 @@ impl StoragePath {
         unsafe { self.path_mut() }.truncate(new_len)
     }
 
-    /// Truncates the path to the new length.
+    /// Truncates the path to the `new_len`.
     ///
     /// # Unsafe
     /// The `new_len` must be >= to the `base_len` and must be a valid char boundary.

@@ -1,6 +1,7 @@
 use std::fmt::{Display, Formatter};
 use std::io;
 use std::io::ErrorKind;
+use std::io::ErrorKind::{AlreadyExists, NotFound, Unsupported};
 use std::path::Path;
 
 use crate::Reason::Other;
@@ -19,7 +20,9 @@ pub struct Error {
 impl Error {
     //! Construction
 
-    /// Creates a new error.
+    /// Creates a new error from the `reason`.
+    ///
+    /// The `cause` will be `None`.
     pub fn new<P>(path: P, operation: Operation, reason: Reason) -> Self
     where
         P: Into<StoragePath>,
@@ -34,6 +37,8 @@ impl Error {
     }
 
     /// Creates an error from the `cause`.
+    ///
+    /// The `reason` will be `Other`.
     pub fn from_cause<P, E>(path: P, operation: Operation, cause: E) -> Self
     where
         P: Into<StoragePath>,
@@ -49,6 +54,9 @@ impl Error {
     }
 
     /// Creates an error from the `message`.
+    ///
+    /// The `cause` will be an `std::io::Error` with the `message`.
+    /// The `reason` will be `Other`.
     pub fn from_message<P, S>(path: P, operation: Operation, message: S) -> Self
     where
         P: Into<StoragePath>,
@@ -108,8 +116,14 @@ impl Error {
 
 impl From<Error> for io::Error {
     fn from(error: Error) -> Self {
-        // todo -- map error kind
-        io::Error::new(ErrorKind::Other, error)
+        let kind: ErrorKind = match error.reason() {
+            Reason::UnknownFileSystem => Unsupported,
+            Reason::OperationNotSupported => Unsupported,
+            Reason::FileNotFound => NotFound,
+            Reason::FileAlreadyExists => AlreadyExists,
+            Other => ErrorKind::Other,
+        };
+        io::Error::new(kind, error)
     }
 }
 

@@ -14,8 +14,7 @@ impl StoragePath {
         let named: NamedTempFile = NamedTempFile::new()?;
         let path: &Path = named.path();
         if let Some(named) = named.path().to_str() {
-            let path: StoragePath = StoragePath::parse(named)?;
-            Ok(path)
+            Ok(StoragePath::parse(named)?)
         } else {
             Err(Error::path_not_utf8(path))
         }
@@ -25,16 +24,12 @@ impl StoragePath {
 impl FilePath {
     //! Temp
 
-    /// Creates a temp file.
+    /// Creates a temp path.
     pub fn temp() -> Result<FilePath, io::Error> {
         let path: StoragePath = StoragePath::temp()?;
         if path.is_file() {
-            Ok(path.make_file("temp.file").ok_or_else(|| {
-                io::Error::new(
-                    Other,
-                    "`e` is a file separator on this file system ¯\\_(ツ)_/¯.",
-                )
-            })?)
+            path.make_file("temp.file")
+                .map_err(|_| io::Error::new(Other, "¯\\_(ツ)_/¯"))
         } else {
             Err(Error::unknown_file_system(path.as_ref()))
         }

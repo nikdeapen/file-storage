@@ -14,7 +14,7 @@ impl<'a> R2Path<'a> {
             .block_on(self.exists_async())
     }
 
-    /// See `R2Path::exist`.
+    /// See `FilePath::exist`.
     pub async fn exists_async(&self) -> Result<bool, Error> {
         use aws_sdk_s3::error::SdkError;
         use std::io;

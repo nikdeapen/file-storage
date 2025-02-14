@@ -1,17 +1,5 @@
 use crate::{FilePath, FolderPath, StoragePath};
 
-impl FilePath {
-    //! Make Folder
-
-    /// Makes the file a folder by appending a file separator.
-    pub fn make_folder(self) -> FolderPath {
-        let mut path: StoragePath = self.to_path();
-        let file_separator: char = path.file_separator();
-        unsafe { path.path_mut().push(file_separator) };
-        path.to_folder().unwrap()
-    }
-}
-
 impl StoragePath {
     //! Make Folder
 
@@ -39,5 +27,17 @@ impl StoragePath {
             let fs: char = self.file_separator();
             self.with_appended_char(fs).to_folder().unwrap()
         }
+    }
+}
+
+impl FilePath {
+    //! Make Folder
+
+    /// Makes the file a folder by appending a file separator.
+    pub fn make_folder(self) -> FolderPath {
+        let mut path: StoragePath = self.to_path();
+        let file_separator: char = path.file_separator();
+        unsafe { path.path_mut().push(file_separator) };
+        path.to_folder().unwrap()
     }
 }

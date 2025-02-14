@@ -14,7 +14,7 @@ impl<'a> R2Path<'a> {
             .block_on(self.delete_async())
     }
 
-    /// See `R2Path::delete`.
+    /// See `FilePath::delete`.
     pub async fn delete_async(&self) -> Result<(), Error> {
         let response = Self::get_client(self.account_id)
             .await

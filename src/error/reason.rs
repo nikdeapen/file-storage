@@ -9,7 +9,7 @@ pub enum Reason {
     /// The file system does not support the operation.
     OperationNotSupported,
 
-    /// The file was not found. (this can also mean unauthorized)
+    /// The file was not found.
     FileNotFound,
 
     /// The file already exists.
