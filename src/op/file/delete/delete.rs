@@ -13,6 +13,11 @@ impl FilePath {
             return self.delete_if_exists().map(|_| ());
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(path) = crate::R2Path::from(self.path()) {
+            return path.delete();
+        }
+
         Err(Error::new(self.clone(), Delete, Reason::UnknownFileSystem))
     }
 
@@ -23,6 +28,15 @@ impl FilePath {
     pub fn delete_if_exists(&self) -> Result<bool, Error> {
         if let Some(local) = LocalPath::from(self.path()) {
             return local.delete_if_exists();
+        }
+
+        #[cfg(feature = "r2")]
+        if let Some(_) = crate::R2Path::from(self.path()) {
+            return Err(Error::new(
+                self.clone(),
+                Delete,
+                Reason::UnsupportedOperation,
+            ));
         }
 
         Err(Error::new(self.clone(), Delete, Reason::UnknownFileSystem))

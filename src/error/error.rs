@@ -117,7 +117,7 @@ impl From<Error> for io::Error {
     fn from(error: Error) -> Self {
         let kind: ErrorKind = match error.reason() {
             Reason::UnknownFileSystem => Unsupported,
-            Reason::OperationNotSupported => Unsupported,
+            Reason::UnsupportedOperation => Unsupported,
             Reason::FileNotFound => NotFound,
             Reason::FileAlreadyExists => AlreadyExists,
             Other => ErrorKind::Other,
