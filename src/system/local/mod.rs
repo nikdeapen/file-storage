@@ -4,3 +4,4 @@ mod local_path;
 
 mod delete;
 mod exists;
+mod read;
