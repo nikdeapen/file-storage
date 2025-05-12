@@ -7,6 +7,11 @@ impl StoragePath {
     pub fn len(&self) -> usize {
         self.path().len()
     }
+
+    /// Checks if the path is empty.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 impl FilePath {
@@ -16,6 +21,11 @@ impl FilePath {
     pub fn len(&self) -> usize {
         self.path().len()
     }
+
+    /// Checks if the path is empty.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 impl FolderPath {
@@ -24,6 +34,11 @@ impl FolderPath {
     /// Gets the path length. (in bytes)
     pub fn len(&self) -> usize {
         self.path().len()
+    }
+
+    /// Checks if the path is empty.
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 }
 

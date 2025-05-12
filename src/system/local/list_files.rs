@@ -18,7 +18,7 @@ impl<'a> LocalPath<'a> {
         while let Some(current_folder) = folders.pop() {
             match std::fs::read_dir(current_folder) {
                 Ok(mut read_dir) => {
-                    while let Some(next) = read_dir.next() {
+                    for next in read_dir.by_ref() {
                         match next {
                             Ok(dir_entry) => match dir_entry.file_type() {
                                 Ok(file_type) => {

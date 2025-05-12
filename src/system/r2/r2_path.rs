@@ -35,12 +35,11 @@ impl<'a> R2Path<'a> {
     /// Returns `Some(account_id, bucket, key)`.
     /// Returns `None` if the `path` is not a Cloudflare R2 path.
     fn parse_parts(path: &str) -> Option<(&str, &str, &str)> {
-        let s: &str = path.as_ref();
+        let s: &str = path;
         if s.starts_with(Self::HTTPS_PREFIX) {
             if let Some(dot) = s.as_bytes().iter().position(|c| *c == b'.') {
                 let (account_id, s) = s.split_at(dot);
-                if s.starts_with(Self::R2_PREFIX) {
-                    let s: &str = &s[Self::R2_PREFIX.len()..];
+                if let Some(s) = s.strip_prefix(Self::R2_PREFIX) {
                     if let Some(slash) = s.as_bytes().iter().position(|c| *c == b'/') {
                         let bucket: &str = &s[..slash];
                         let key: &str = &s[(slash + 1)..];

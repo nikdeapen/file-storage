@@ -11,7 +11,7 @@ impl Ord for StoragePath {
 
 impl PartialOrd for StoragePath {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.path().partial_cmp(other.path())
+        Some(self.cmp(other))
     }
 }
 

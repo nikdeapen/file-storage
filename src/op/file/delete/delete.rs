@@ -31,7 +31,7 @@ impl FilePath {
         }
 
         #[cfg(feature = "r2")]
-        if let Some(_) = crate::R2Path::from(self.path()) {
+        if crate::R2Path::from(self.path()).is_some() {
             return Err(Error::new(
                 self.clone(),
                 Delete,

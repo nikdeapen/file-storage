@@ -31,7 +31,7 @@ impl AsRef<OsStr> for StoragePath {
 
 impl AsRef<StoragePath> for StoragePath {
     fn as_ref(&self) -> &StoragePath {
-        &self
+        self
     }
 }
 
@@ -64,7 +64,7 @@ impl AsRef<OsStr> for FilePath {
 
 impl AsRef<FilePath> for FilePath {
     fn as_ref(&self) -> &FilePath {
-        &self
+        self
     }
 }
 
@@ -97,6 +97,6 @@ impl AsRef<OsStr> for FolderPath {
 
 impl AsRef<FolderPath> for FolderPath {
     fn as_ref(&self) -> &FolderPath {
-        &self
+        self
     }
 }

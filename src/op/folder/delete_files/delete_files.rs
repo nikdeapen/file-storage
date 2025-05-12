@@ -15,7 +15,7 @@ impl FolderPath {
         }
 
         #[cfg(feature = "r2")]
-        if let Some(_) = crate::R2Path::from(self.path()) {
+        if crate::R2Path::from(self.path()).is_some() {
             for file in self.list_files_as_vec()?.drain(..) {
                 file.delete()?;
             }

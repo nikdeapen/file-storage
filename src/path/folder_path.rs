@@ -11,7 +11,7 @@ impl FolderPath {
 
     /// Creates a folder path from the `path`.
     ///
-    /// # Unsafe
+    /// # Safety
     /// The `path` must be a valid folder path.
     pub unsafe fn new(path: StoragePath) -> Self {
         Self { path }

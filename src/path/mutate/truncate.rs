@@ -5,7 +5,7 @@ impl StoragePath {
 
     /// Truncates the path to the `new_len`.
     ///
-    /// # Unsafe
+    /// # Safety
     /// The `new_len` must be >= to the `base_len` and must be a valid char boundary.
     pub unsafe fn truncate(&mut self, new_len: usize) {
         debug_assert!(new_len > self.base_len());
@@ -16,7 +16,7 @@ impl StoragePath {
 
     /// Truncates the path to the `new_len`.
     ///
-    /// # Unsafe
+    /// # Safety
     /// The `new_len` must be >= to the `base_len` and must be a valid char boundary.
     pub unsafe fn truncated(mut self, new_len: usize) -> Self {
         debug_assert!(new_len > self.base_len());

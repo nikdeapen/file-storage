@@ -10,7 +10,7 @@ impl StoragePath {
 
     /// Checks if the path is a folder. (if not, the path is a file)
     pub fn is_folder(&self) -> bool {
-        self.extension().len() == 0 || self.path().ends_with(self.file_separator())
+        self.extension().is_empty() || self.path().ends_with(self.file_separator())
     }
 }
 

@@ -18,12 +18,12 @@ pub fn test_delete_if_exist(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
     assert!(!file.exists()?);
-    assert_eq!(file.delete_if_exists()?, false);
+    assert!(!file.delete_if_exists()?);
     assert!(!file.exists()?);
 
     file.write_str("Hello, World!")?;
     assert!(file.exists()?);
-    assert_eq!(file.delete_if_exists()?, true);
+    assert!(file.delete_if_exists()?);
     assert!(!file.exists()?);
 
     Ok(())

@@ -35,7 +35,7 @@ impl StoragePath {
 
     /// Creates a new storage path.
     ///
-    /// # Unsafe
+    /// # Safety
     /// The `base_len` must be a valid char boundary in the `path`.
     pub unsafe fn new<S>(path: S, base_len: usize, file_separator: char) -> Self
     where
@@ -63,7 +63,7 @@ impl StoragePath {
 
     /// Gets the mutable path string.
     ///
-    /// # Unsafe
+    /// # Safety
     /// The path string must remain valid for the path.
     pub unsafe fn path_mut(&mut self) -> &mut String {
         &mut self.path
