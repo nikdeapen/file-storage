@@ -1,9 +1,9 @@
+use crate::{Error, Operation, StoragePath};
 use aws_config::{BehaviorVersion, Region};
 use aws_sdk_s3::{Client, Config};
 use dashmap::DashMap;
 use once_cell::sync::Lazy;
-
-use crate::StoragePath;
+use tokio::runtime::Runtime;
 
 /// The global Cloudflare R2 `Client` map. `(account_id -> client)`.
 static R2_CLIENTS: Lazy<DashMap<String, Client>> = Lazy::new(DashMap::new);
@@ -110,5 +110,17 @@ impl<'a> R2Path<'a> {
         .build();
 
         Client::from_conf(config)
+    }
+}
+
+impl<'a> R2Path<'a> {
+    //! Runtime
+
+    /// Creates a single-threaded tokio runtime.
+    pub fn runtime(&self, operation: Operation) -> Result<Runtime, Error> {
+        tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build()
+            .map_err(|error| Error::from_source(self.path.clone(), operation, error))
     }
 }
