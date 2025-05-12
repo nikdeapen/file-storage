@@ -27,7 +27,7 @@ impl<'a> LocalPath<'a> {
                 if error.kind() == NotFound {
                     Ok(false)
                 } else {
-                    Err(Error::from_cause(self.path.clone(), Exists, error))
+                    Err(Error::from_source(self.path.clone(), Exists, error))
                 }
             }
         }

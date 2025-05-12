@@ -18,7 +18,7 @@ impl<'a> LocalPath<'a> {
             match std::fs::create_dir_all(parent) {
                 Ok(()) => {}
                 Err(error) => {
-                    return Err(Error::from_cause(
+                    return Err(Error::from_source(
                         self.path.clone(),
                         Operation::Write,
                         error,
@@ -29,16 +29,16 @@ impl<'a> LocalPath<'a> {
         match std::fs::File::create_new(self.path) {
             Ok(mut file) => {
                 file.write_all(data.as_ref())
-                    .map_err(|e| Error::from_cause(self.path.clone(), Operation::Write, e))?;
+                    .map_err(|e| Error::from_source(self.path.clone(), Operation::Write, e))?;
                 file.sync_all()
-                    .map_err(|e| Error::from_cause(self.path.clone(), Operation::Write, e))?;
+                    .map_err(|e| Error::from_source(self.path.clone(), Operation::Write, e))?;
                 Ok(true)
             }
             Err(error) => {
                 if error.kind() == AlreadyExists {
                     Ok(false)
                 } else {
-                    Err(Error::from_cause(
+                    Err(Error::from_source(
                         self.path.clone(),
                         Operation::Write,
                         error,

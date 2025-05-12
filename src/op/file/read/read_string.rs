@@ -27,7 +27,7 @@ impl FilePath {
         if let Some(file_content) = self.read_as_vec_if_exists()? {
             match String::from_utf8(file_content) {
                 Ok(file_content) => Ok(Some(file_content)),
-                Err(error) => Err(Error::from_cause(
+                Err(error) => Err(Error::from_source(
                     self.clone(),
                     Read,
                     io::Error::new(Other, error),
@@ -66,7 +66,7 @@ impl FilePath {
                         Ok(_) => Ok(Some(file_content_len)),
                         Err(e) => {
                             target.truncate(original_len);
-                            Err(Error::from_cause(
+                            Err(Error::from_source(
                                 self.clone(),
                                 Read,
                                 io::Error::new(Other, e),

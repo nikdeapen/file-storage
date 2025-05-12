@@ -1,4 +1,3 @@
-use crate::Reason::Other;
 use crate::StoragePath;
 use crate::{Operation, Reason};
 use std::fmt::{Display, Formatter};
@@ -13,7 +12,7 @@ pub struct Error {
     path: StoragePath,
     operation: Operation,
     reason: Reason,
-    cause: Option<io::Error>,
+    source: Option<io::Error>,
 }
 
 impl Error {
@@ -21,7 +20,7 @@ impl Error {
 
     /// Creates an error from the `reason`.
     ///
-    /// The `cause` will be `None`.
+    /// The `source` will be `None`.
     pub fn new<P>(path: P, operation: Operation, reason: Reason) -> Self
     where
         P: Into<StoragePath>,
@@ -31,14 +30,14 @@ impl Error {
             path,
             operation,
             reason,
-            cause: None,
+            source: None,
         }
     }
 
-    /// Creates an error from the `cause`.
+    /// Creates an error from the `source`.
     ///
     /// The `reason` will be `Other`.
-    pub fn from_cause<P, E>(path: P, operation: Operation, cause: E) -> Self
+    pub fn from_source<P, E>(path: P, operation: Operation, source: E) -> Self
     where
         P: Into<StoragePath>,
         E: Into<io::Error>,
@@ -47,21 +46,21 @@ impl Error {
         Self {
             path,
             operation,
-            reason: Other,
-            cause: Some(cause.into()),
+            reason: Reason::Other,
+            source: Some(source.into()),
         }
     }
 
     /// Creates an error from the `message`.
     ///
-    /// The `cause` will be an `std::io::Error` with the `message`.
+    /// The `source` will be a `std::io::Error` with the `message`.
     /// The `reason` will be `Other`.
     pub fn from_message<P, S>(path: P, operation: Operation, message: S) -> Self
     where
         P: Into<StoragePath>,
         S: Into<String>,
     {
-        Error::from_cause(
+        Error::from_source(
             path,
             operation,
             io::Error::new(ErrorKind::Other, message.into()),
@@ -107,9 +106,9 @@ impl Error {
         self.reason
     }
 
-    /// Gets the optional cause.
-    pub fn cause(&self) -> Option<&io::Error> {
-        self.cause.as_ref()
+    /// Gets the optional source.
+    pub fn source(&self) -> Option<&io::Error> {
+        self.source.as_ref()
     }
 }
 
@@ -120,7 +119,7 @@ impl From<Error> for io::Error {
             Reason::UnsupportedOperation => Unsupported,
             Reason::FileNotFound => NotFound,
             Reason::FileAlreadyExists => AlreadyExists,
-            Other => ErrorKind::Other,
+            Reason::Other => ErrorKind::Other,
         };
         io::Error::new(kind, error)
     }
@@ -138,8 +137,8 @@ impl Display for Error {
             "{} error: op={} path={} ",
             file_or_folder, self.operation, self.path
         )?;
-        if let Some(cause) = self.cause() {
-            write!(f, "cause={}", cause)?;
+        if let Some(source) = self.source() {
+            write!(f, "source={}", source)?;
         } else {
             write!(f, "reason={}", self.reason)?;
         }

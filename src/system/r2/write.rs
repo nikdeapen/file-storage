@@ -45,7 +45,7 @@ impl<'a> R2Path<'a> {
             {
                 Ok(false)
             }
-            Err(error) => Err(Error::from_cause(
+            Err(error) => Err(Error::from_source(
                 self.path.clone(),
                 Write,
                 std::io::Error::new(std::io::ErrorKind::Other, error),

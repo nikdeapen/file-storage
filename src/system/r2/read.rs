@@ -39,8 +39,8 @@ impl<'a> R2Path<'a> {
                 let mut body: ByteStream = response.body;
                 let original_len: usize = target.len();
                 while let Some(chunk) = body.next().await {
-                    let chunk: Bytes =
-                        chunk.map_err(|error| Error::from_cause(self.path.clone(), Read, error))?;
+                    let chunk: Bytes = chunk
+                        .map_err(|error| Error::from_source(self.path.clone(), Read, error))?;
                     target.extend_from_slice(&chunk);
                 }
                 Ok(Some(target.len() - original_len))
@@ -49,7 +49,7 @@ impl<'a> R2Path<'a> {
                 if matches!(error.as_service_error(), Some(GetObjectError::NoSuchKey(_))) {
                     Ok(None)
                 } else {
-                    Err(Error::from_cause(
+                    Err(Error::from_source(
                         self.path.clone(),
                         Read,
                         std::io::Error::new(std::io::ErrorKind::Other, error),

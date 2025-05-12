@@ -31,7 +31,7 @@ impl<'a> R2Path<'a> {
             Ok(_response) => Ok(true),
             Err(error) => match error {
                 SdkError::ServiceError(e) if e.err().is_not_found() => Ok(false),
-                error => Err(Error::from_cause(
+                error => Err(Error::from_source(
                     self.path.clone(),
                     Exists,
                     io::Error::new(Other, error),

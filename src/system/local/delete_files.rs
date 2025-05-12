@@ -11,10 +11,10 @@ impl<'a> LocalPath<'a> {
 
         let path: &str = self.path.as_str();
         if std::fs::exists(path)
-            .map_err(|e| Error::from_cause(self.path.clone(), DeleteFiles, e))?
+            .map_err(|e| Error::from_source(self.path.clone(), DeleteFiles, e))?
         {
             std::fs::remove_dir_all(path)
-                .map_err(|e| Error::from_cause(self.path.clone(), DeleteFiles, e))
+                .map_err(|e| Error::from_source(self.path.clone(), DeleteFiles, e))
         } else {
             Ok(())
         }

@@ -35,7 +35,7 @@ impl<'a> LocalPath<'a> {
                                     }
                                 }
                                 Err(error) => {
-                                    return Err(Error::from_cause(
+                                    return Err(Error::from_source(
                                         self.path.clone(),
                                         ListFiles,
                                         error,
@@ -43,7 +43,7 @@ impl<'a> LocalPath<'a> {
                                 }
                             },
                             Err(error) => {
-                                return Err(Error::from_cause(self.path.clone(), ListFiles, error))
+                                return Err(Error::from_source(self.path.clone(), ListFiles, error))
                             }
                         }
                     }
@@ -55,7 +55,7 @@ impl<'a> LocalPath<'a> {
                     {
                         break;
                     } else {
-                        return Err(Error::from_cause(self.path.clone(), ListFiles, error));
+                        return Err(Error::from_source(self.path.clone(), ListFiles, error));
                     }
                 }
             }

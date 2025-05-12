@@ -14,7 +14,7 @@ impl<'a> LocalPath<'a> {
             Ok(mut file) => {
                 let start: usize = target.len();
                 let read: usize = file.read_to_end(target).map_err(|error| {
-                    Error::from_cause(self.path.clone(), Operation::Read, error)
+                    Error::from_source(self.path.clone(), Operation::Read, error)
                 })?;
                 debug_assert_eq!(target.len(), start + read);
                 Ok(Some(read))
@@ -23,7 +23,11 @@ impl<'a> LocalPath<'a> {
                 if error.kind() == NotFound {
                     Ok(None)
                 } else {
-                    Err(Error::from_cause(self.path.clone(), Operation::Read, error))
+                    Err(Error::from_source(
+                        self.path.clone(),
+                        Operation::Read,
+                        error,
+                    ))
                 }
             }
         }

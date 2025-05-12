@@ -9,6 +9,7 @@ impl FolderPath {
     /// Gets the current working directory.
     pub fn current_working_directory() -> Result<Self, io::Error> {
         let path: PathBuf = std::env::current_dir()?;
+
         if let Some(path) = path.to_str() {
             Ok(StoragePath::parse(path)?.make_folder())
         } else {

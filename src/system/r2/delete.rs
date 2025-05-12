@@ -25,7 +25,7 @@ impl<'a> R2Path<'a> {
             .await;
         match response {
             Ok(_response) => Ok(()),
-            Err(error) => Err(Error::from_cause(
+            Err(error) => Err(Error::from_source(
                 self.path.clone(),
                 Delete,
                 std::io::Error::new(std::io::ErrorKind::Other, error),

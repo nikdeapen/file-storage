@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 /// The reason for a file or folder operation error.
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
 pub enum Reason {
-    /// The file system for the path could not be resolved.
+    /// The file system could not be resolved.
     UnknownFileSystem,
 
     /// The file system does not support the operation.
@@ -15,7 +15,7 @@ pub enum Reason {
     /// The file already exists.
     FileAlreadyExists,
 
-    /// Another uncategorized error.
+    /// Another uncategorized reason.
     Other,
 }
 
@@ -23,7 +23,7 @@ impl Display for Reason {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let s: &str = match self {
             Reason::UnknownFileSystem => "unknown file system",
-            Reason::UnsupportedOperation => "operation not supported",
+            Reason::UnsupportedOperation => "unsupported operation",
             Reason::FileNotFound => "file not found",
             Reason::FileAlreadyExists => "file already exists",
             Reason::Other => "other",

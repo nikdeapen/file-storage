@@ -43,7 +43,7 @@ impl<'a> R2Path<'a> {
                                 key
                             );
                             let path: StoragePath = StoragePath::parse(s)
-                                .map_err(|e| Error::from_cause(self.path.clone(), ListFiles, e))?;
+                                .map_err(|e| Error::from_source(self.path.clone(), ListFiles, e))?;
                             if path.is_file() {
                                 target.push(path.to_file().unwrap())
                             }
@@ -52,7 +52,7 @@ impl<'a> R2Path<'a> {
                 }
                 Ok(target.len() - original_len)
             }
-            Err(error) => Err(Error::from_cause(
+            Err(error) => Err(Error::from_source(
                 self.path.clone(),
                 ListFiles,
                 std::io::Error::new(std::io::ErrorKind::Other, error),
