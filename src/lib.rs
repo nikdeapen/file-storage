@@ -2,6 +2,7 @@
 #![allow(clippy::needless_lifetimes)]
 
 pub use error::*;
+pub use op::*;
 pub use path::*;
 pub(crate) use system::*;
 
