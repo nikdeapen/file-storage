@@ -20,6 +20,9 @@ pub enum Operation {
 
     /// Delete the files in a folder.
     DeleteFiles,
+
+    /// Convert or mutate the path.
+    PathConversion,
 }
 
 impl Display for Operation {
@@ -31,6 +34,7 @@ impl Display for Operation {
             Operation::Delete => "delete",
             Operation::ListFiles => "list-files",
             Operation::DeleteFiles => "delete-files",
+            Operation::PathConversion => "path-conversion",
         };
         write!(f, "{}", s)
     }

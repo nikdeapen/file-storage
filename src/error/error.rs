@@ -96,6 +96,11 @@ impl Error {
         &self.path
     }
 
+    /// Exports the storage path.
+    pub fn export_path(self) -> StoragePath {
+        self.path
+    }
+
     /// Gets the operation.
     pub fn operation(&self) -> Operation {
         self.operation
