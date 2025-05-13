@@ -1,7 +1,7 @@
 use crate::op::ReadFileInner;
 use crate::system::{R2Path, R2ReadFile};
 use crate::Operation::Read;
-use crate::{Error, ReadFile};
+use crate::{Error, FileRead};
 use aws_sdk_s3::error::SdkError;
 use aws_sdk_s3::operation::get_object::{GetObjectError, GetObjectOutput};
 
@@ -33,9 +33,9 @@ impl<'a> R2Path<'a> {
         }
     }
 
-    async fn read_if_exists_async(&self) -> Result<Option<ReadFile>, Error> {
+    async fn read_if_exists_async(&self) -> Result<Option<FileRead>, Error> {
         if let Some(object) = self.get_object_output().await? {
-            Ok(Some(ReadFile {
+            Ok(Some(FileRead {
                 inner: ReadFileInner::R2(R2ReadFile::from(object)),
             }))
         } else {
@@ -43,7 +43,7 @@ impl<'a> R2Path<'a> {
         }
     }
 
-    pub fn read_if_exists(&self) -> Result<Option<ReadFile>, Error> {
+    pub fn read_if_exists(&self) -> Result<Option<FileRead>, Error> {
         self.runtime(Read)?.block_on(self.read_if_exists_async())
     }
 

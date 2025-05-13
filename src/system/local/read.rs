@@ -1,6 +1,6 @@
 use crate::op::ReadFileInner;
 use crate::system::{LocalPath, LocalReadFile};
-use crate::{Error, Operation, ReadFile};
+use crate::{Error, FileRead, Operation};
 use std::io::ErrorKind::NotFound;
 use std::io::Read;
 
@@ -8,9 +8,9 @@ impl<'a> LocalPath<'a> {
     //! Read
 
     /// See `FilePath::read_if_exists`.
-    pub fn read_if_exists(&self) -> Result<Option<ReadFile>, Error> {
+    pub fn read_if_exists(&self) -> Result<Option<FileRead>, Error> {
         match std::fs::File::open(self.path.as_str()) {
-            Ok(file) => Ok(Some(ReadFile {
+            Ok(file) => Ok(Some(FileRead {
                 inner: ReadFileInner::Local(LocalReadFile { file }),
             })),
             Err(error) => {

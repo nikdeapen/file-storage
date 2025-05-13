@@ -1,11 +1,11 @@
 use crate::system::LocalPath;
-use crate::{Error, FilePath, Operation, ReadFile, Reason};
+use crate::{Error, FilePath, FileRead, Operation, Reason};
 
 impl FilePath {
     //! Read
 
     /// Reads the file if it exists.
-    pub fn read_if_exists(&self) -> Result<Option<ReadFile>, Error> {
+    pub fn read_if_exists(&self) -> Result<Option<FileRead>, Error> {
         if let Some(local) = LocalPath::from(self.path()) {
             return local.read_if_exists();
         }
@@ -23,7 +23,7 @@ impl FilePath {
     }
 
     /// Reads the file.
-    pub fn read(&self) -> Result<ReadFile, Error> {
+    pub fn read(&self) -> Result<FileRead, Error> {
         if let Some(read) = self.read_if_exists()? {
             Ok(read)
         } else {
