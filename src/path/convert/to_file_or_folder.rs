@@ -10,7 +10,7 @@ impl StoragePath {
         if self.is_file() {
             Ok(unsafe { FilePath::new(self) })
         } else {
-            Err(Error::new(self, Operation::PathConversion, Reason::Other))
+            Err(Error::new(self, Operation::ModifyPath, Reason::Other))
         }
     }
 
@@ -21,7 +21,7 @@ impl StoragePath {
         if self.is_folder() {
             Ok(unsafe { FolderPath::new(self) })
         } else {
-            Err(Error::new(self, Operation::PathConversion, Reason::Other))
+            Err(Error::new(self, Operation::ModifyPath, Reason::Other))
         }
     }
 }

@@ -75,3 +75,26 @@ impl FolderPath {
         self.path().clone_append(string)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{FilePath, FolderPath, StoragePath};
+    use std::error::Error;
+
+    #[test]
+    fn append() -> Result<(), Box<dyn Error>> {
+        let path: StoragePath = StoragePath::unix_root();
+        let result: StoragePath = path.with_appended("file.txt");
+        assert_eq!(result.as_str(), "/file.txt");
+
+        let file: FilePath = FolderPath::unix_root().make_file("file")?;
+        let result: StoragePath = file.with_appended(".txt");
+        assert_eq!(result.as_str(), "/file.txt");
+
+        let folder: FolderPath = FolderPath::unix_root();
+        let result: StoragePath = folder.with_appended("file.txt");
+        assert_eq!(result.as_str(), "/file.txt");
+
+        Ok(())
+    }
+}

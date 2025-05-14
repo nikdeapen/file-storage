@@ -41,3 +41,19 @@ impl FilePath {
         path.to_folder().unwrap()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::StoragePath;
+
+    #[test]
+    fn make_folder() {
+        let path: StoragePath = StoragePath::unix_root();
+
+        let path: StoragePath = path.make_folder().to_path();
+        assert_eq!(path.as_str(), "/");
+
+        let path: StoragePath = path.with_appended("file.txt").make_folder().to_path();
+        assert_eq!(path.as_str(), "/file.txt/");
+    }
+}

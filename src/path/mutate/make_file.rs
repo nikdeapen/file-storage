@@ -20,7 +20,7 @@ impl StoragePath {
             } else {
                 let original_len: usize = path.len() - file_name.len();
                 let path: StoragePath = unsafe { path.truncated(original_len) };
-                Err(Error::new(path, Operation::PathConversion, Reason::Other))
+                Err(Error::new(path, Operation::ModifyPath, Reason::Other))
             }
         }
     }
@@ -34,5 +34,24 @@ impl FolderPath {
     /// Returns `None` if the `file_name` is empty or ends with the file-separator.
     pub fn make_file(self, file_name: &str) -> Result<FilePath, Error> {
         self.to_path().make_file(file_name)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::StoragePath;
+    use std::error::Error;
+
+    #[test]
+    fn make_file() -> Result<(), Box<dyn Error>> {
+        let path: StoragePath = StoragePath::unix_root();
+
+        let path: StoragePath = path.make_file("file.txt")?.to_path();
+        assert_eq!(path.as_str(), "/file.txt");
+
+        let path: StoragePath = path.make_file("ignored")?.to_path();
+        assert_eq!(path.as_str(), "/file.txt");
+
+        Ok(())
     }
 }

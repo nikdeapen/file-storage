@@ -1,6 +1,6 @@
 [package]
 name = "file-storage"
-version = "0.0.0"
+version = "0.2.0"
 description = "This library aids in accessing file-like storage."
 readme = "README.md"
 repository = "https://github.com/nikdeapen/file-storage"
@@ -13,6 +13,7 @@ license = "MIT"
 tempfile = { version = "3.20.0", optional = true }
 
 # R2
+# todo -- optimize these imports
 aws-config = { version = "1.5.9", optional = true }
 aws-sdk-s3 = { version = "1.85.0", optional = true }
 dashmap = { version = "7.0.0-rc2", optional = true }

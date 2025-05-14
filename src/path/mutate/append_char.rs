@@ -32,3 +32,26 @@ impl FolderPath {
         self.to_path().with_appended_char(c)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{FilePath, FolderPath, StoragePath};
+    use std::error::Error;
+
+    #[test]
+    fn append() -> Result<(), Box<dyn Error>> {
+        let path: StoragePath = StoragePath::unix_root();
+        let result: StoragePath = path.with_appended_char('c');
+        assert_eq!(result.as_str(), "/c");
+
+        let file: FilePath = FolderPath::unix_root().make_file("file")?;
+        let result: StoragePath = file.with_appended_char('c');
+        assert_eq!(result.as_str(), "/filec");
+
+        let folder: FolderPath = FolderPath::unix_root();
+        let result: StoragePath = folder.with_appended_char('c');
+        assert_eq!(result.as_str(), "/c");
+
+        Ok(())
+    }
+}
