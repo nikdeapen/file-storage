@@ -1,6 +1,6 @@
-pub use read_file::*;
+pub use file_read::*;
 
-mod read_file;
+mod file_read;
 
 mod read;
 mod read_string;
