@@ -30,6 +30,11 @@ impl FolderPath {
     /// # Note
     /// Only the appended files will be sorted, not the entire `target`.
     pub fn list_files_to_vec(&self, target: &mut Vec<FilePath>) -> Result<usize, Error> {
+        #[cfg(feature = "r2")]
+        if let Some(path) = crate::R2Path::from(self.path()) {
+            return path.list_files_to_vec(target);
+        }
+
         let original_len: usize = target.len();
         let file_count: usize = self.list_files_to_vec_unsorted(target)?;
         let slice: &mut [FilePath] = &mut target.as_mut_slice()[original_len..];
@@ -43,6 +48,11 @@ impl FolderPath {
     pub fn list_files_to_vec_unsorted(&self, target: &mut Vec<FilePath>) -> Result<usize, Error> {
         if let Some(local) = LocalPath::from(self.path()) {
             return local.list_files_to_vec_unsorted(target);
+        }
+
+        #[cfg(feature = "r2")]
+        if let Some(path) = crate::R2Path::from(self.path()) {
+            return path.list_files_to_vec(target);
         }
 
         Err(Error::new(self.clone(), ListFiles, UnknownFileSystem))
