@@ -7,3 +7,4 @@ mod folder_path;
 mod storage_path;
 
 mod core;
+mod properties;
