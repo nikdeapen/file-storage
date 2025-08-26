@@ -12,6 +12,11 @@ impl FilePath {
             return local.exists();
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(r2) = crate::R2Path::from(self.path()) {
+            return r2.exists();
+        }
+
         Err(Error::new(self.clone(), Exists, UnknownFileSystem))
     }
 }
