@@ -33,6 +33,11 @@ impl FilePath {
             return local.write_slice_if_not_exists(slice);
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(path) = crate::R2Path::from(self.path()) {
+            return path.write_slice_if_not_exists(slice);
+        }
+
         Err(Error::new(self.clone(), Write, UnknownFileSystem))
     }
 }
