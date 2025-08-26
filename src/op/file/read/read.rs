@@ -10,6 +10,11 @@ impl FilePath {
             return local.read_if_exists();
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(r2) = crate::R2Path::from(self.path()) {
+            return r2.read_if_exists();
+        }
+
         Err(Error::new(
             self.clone(),
             Operation::Read,
