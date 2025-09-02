@@ -1,3 +1,4 @@
+use crate::system::r2::r2_path::RUNTIME;
 use crate::system::R2Path;
 use crate::Error;
 use crate::Operation::Exists;
@@ -7,7 +8,7 @@ impl<'a> R2Path<'a> {
 
     /// See `FilePath::exist`.
     pub fn exists(&self) -> Result<bool, Error> {
-        Self::RUNTIME.block_on(self.exists_async())
+        RUNTIME.block_on(self.exists_async())
     }
 
     /// See `FilePath::exist`.

@@ -60,11 +60,7 @@ impl Error {
         P: Into<StoragePath>,
         S: Into<String>,
     {
-        Error::from_source(
-            path,
-            operation,
-            io::Error::new(ErrorKind::Other, message.into()),
-        )
+        Error::from_source(path, operation, io::Error::other(message.into()))
     }
 }
 
@@ -73,10 +69,7 @@ impl Error {
 
     /// Gets the `unknown file system` error.
     pub fn unknown_file_system(path: &str) -> io::Error {
-        io::Error::new(
-            ErrorKind::Other,
-            format!("unknown file system for path: {}", path),
-        )
+        io::Error::other(format!("unknown file system for path: {}", path))
     }
 
     /// Gets the `path not utf-8` error.

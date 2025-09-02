@@ -55,7 +55,7 @@ impl<'a> R2Path<'a> {
             Err(error) => Err(Error::from_source(
                 self.path.clone(),
                 ListFiles,
-                std::io::Error::new(std::io::ErrorKind::Other, error),
+                std::io::Error::other(error),
             )),
         }
     }
