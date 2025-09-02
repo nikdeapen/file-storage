@@ -9,6 +9,10 @@ use tokio::runtime::{Builder, Runtime};
 /// The global Cloudflare R2 `Client` map. `(account_id -> client)`.
 static R2_CLIENTS: Lazy<DashMap<String, Client>> = Lazy::new(DashMap::new);
 
+/// The runtime.
+pub(in crate::system::r2) static RUNTIME: LazyLock<Runtime> =
+    LazyLock::new(|| Builder::new_multi_thread().enable_all().build().unwrap());
+
 /// A Cloudflare R2 path.
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
 pub struct R2Path<'a> {
@@ -26,10 +30,6 @@ impl<'a> R2Path<'a> {
 
     /// The Cloudflare R2 prefix.
     pub const R2_PREFIX: &'static str = ".r2.cloudflare.com/";
-
-    /// The runtime.
-    pub(in crate::system::r2) const RUNTIME: LazyLock<Runtime> =
-        LazyLock::new(|| Builder::new_multi_thread().enable_all().build().unwrap());
 }
 
 impl<'a> R2Path<'a> {

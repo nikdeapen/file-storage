@@ -1,3 +1,4 @@
+use crate::system::r2::r2_path::RUNTIME;
 use crate::system::R2Path;
 use crate::Error;
 use crate::Operation::Delete;
@@ -7,7 +8,7 @@ impl<'a> R2Path<'a> {
 
     /// See `FilePath::delete`.
     pub fn delete(&self) -> Result<(), Error> {
-        Self::RUNTIME.block_on(self.delete_async())
+        RUNTIME.block_on(self.delete_async())
     }
 
     /// See `FilePath::delete`.
@@ -24,7 +25,7 @@ impl<'a> R2Path<'a> {
             Err(error) => Err(Error::from_source(
                 self.path.clone(),
                 Delete,
-                std::io::Error::new(std::io::ErrorKind::Other, error),
+                std::io::Error::other(error),
             )),
         }
     }

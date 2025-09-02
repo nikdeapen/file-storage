@@ -1,4 +1,5 @@
 use crate::op::ReadFileInner;
+use crate::system::r2::r2_path::RUNTIME;
 use crate::system::{R2FileRead, R2Path};
 use crate::Operation::Read;
 use crate::{Error, FileRead};
@@ -26,7 +27,7 @@ impl<'a> R2Path<'a> {
                     Err(Error::from_source(
                         self.path.clone(),
                         Read,
-                        std::io::Error::new(std::io::ErrorKind::Other, error),
+                        std::io::Error::other(error),
                     ))
                 }
             }
@@ -44,12 +45,12 @@ impl<'a> R2Path<'a> {
     }
 
     pub fn read_if_exists(&self) -> Result<Option<FileRead>, Error> {
-        Self::RUNTIME.block_on(self.read_if_exists_async())
+        RUNTIME.block_on(self.read_if_exists_async())
     }
 
     /// See `FilePath::read_to_vec_if_exists`.
     pub fn read_to_vec_if_exists(&self, target: &mut Vec<u8>) -> Result<Option<usize>, Error> {
-        Self::RUNTIME.block_on(self.read_to_vec_if_exists_async(target))
+        RUNTIME.block_on(self.read_to_vec_if_exists_async(target))
     }
 
     /// See `FilePath::read_to_vec_if_exists`.
