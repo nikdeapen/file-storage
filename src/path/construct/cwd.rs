@@ -1,7 +1,6 @@
+use crate::{Error, FolderPath, StoragePath};
 use std::io;
 use std::path::PathBuf;
-
-use crate::{Error, FolderPath, StoragePath};
 
 impl FolderPath {
     //! Current Working Directory

@@ -12,7 +12,7 @@ impl StoragePath {
 impl FolderPath {
     //! Roots
 
-    /// Creates the unix root path.
+    /// Creates the unix root folder.
     pub fn unix_root() -> Self {
         StoragePath::unix_root().make_folder()
     }
