@@ -1,6 +1,5 @@
-use std::io;
-
 use crate::{Error, StoragePath};
+use std::io;
 
 impl StoragePath {
     //! Parse
