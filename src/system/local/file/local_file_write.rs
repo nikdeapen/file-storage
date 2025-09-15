@@ -7,8 +7,8 @@ pub struct LocalFileWrite {
 }
 
 impl Write for LocalFileWrite {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.file.write(buf)
+    fn write(&mut self, buffer: &[u8]) -> std::io::Result<usize> {
+        self.file.write(buffer)
     }
 
     fn flush(&mut self) -> std::io::Result<()> {
