@@ -21,7 +21,7 @@ pub enum Operation {
     /// Delete the files in a folder.
     DeleteFiles,
 
-    /// Modify the path.
+    /// Modify a path.
     ModifyPath,
 }
 

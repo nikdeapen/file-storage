@@ -89,7 +89,7 @@ impl Error {
         &self.path
     }
 
-    /// Exports the storage path.
+    /// Exports the path.
     pub fn export_path(self) -> StoragePath {
         self.path
     }

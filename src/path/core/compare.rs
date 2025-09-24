@@ -1,7 +1,6 @@
+use crate::path::StoragePath;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
-
-use crate::path::StoragePath;
 
 impl Ord for StoragePath {
     fn cmp(&self, other: &Self) -> Ordering {
