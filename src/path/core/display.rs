@@ -1,5 +1,4 @@
 use std::fmt::{Display, Formatter};
-
 use crate::{FilePath, FolderPath, StoragePath};
 
 impl Display for StoragePath {

@@ -3,7 +3,7 @@ use crate::Error;
 use crate::Operation::DeleteFiles;
 
 impl<'a> LocalPath<'a> {
-    //! Delete
+    //! Delete Files
 
     /// See `FolderPath::delete_files`.
     pub fn delete_files(&self) -> Result<(), Error> {

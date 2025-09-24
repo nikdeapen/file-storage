@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
-
 use crate::path::StoragePath;
 
 impl Ord for StoragePath {

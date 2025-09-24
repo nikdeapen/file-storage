@@ -1,7 +1,6 @@
 use std::fs::DirEntry;
 use std::io::ErrorKind::NotFound;
 use std::path::PathBuf;
-
 use crate::system::LocalPath;
 use crate::Operation::ListFiles;
 use crate::{Error, FilePath, StoragePath};

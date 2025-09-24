@@ -1,5 +1,4 @@
 use std::ffi::OsStr;
-
 use crate::{FilePath, FolderPath, StoragePath};
 
 impl StoragePath {
