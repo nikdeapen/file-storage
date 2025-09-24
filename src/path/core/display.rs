@@ -1,5 +1,5 @@
-use std::fmt::{Display, Formatter};
 use crate::{FilePath, FolderPath, StoragePath};
+use std::fmt::{Display, Formatter};
 
 impl Display for StoragePath {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

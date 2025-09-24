@@ -1,5 +1,5 @@
-use std::ffi::OsStr;
 use crate::{FilePath, FolderPath, StoragePath};
+use std::ffi::OsStr;
 
 impl StoragePath {
     //! AsRef
