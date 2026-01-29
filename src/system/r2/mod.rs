@@ -1,3 +1,4 @@
+pub use file::*;
 pub use r2_path::*;
 
 mod file;
