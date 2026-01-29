@@ -11,3 +11,15 @@ license = "MIT"
 
 [dependencies]
 tempfile = { version = "3.24.0", optional = true }
+
+# R2
+aws-config = { version = "1.5.9", optional = true }
+aws-sdk-s3 = { version = "1.85.0", optional = true }
+dashmap = { version = "7.0.0-rc2", optional = true }
+once_cell = { version = "1.21.3", optional = true }
+tokio = { version = "1.45.0", optional = true }
+bytes = { version = "1.11.0", optional = true }
+aws-smithy-async = { version = "1.2.6", optional = true }
+
+[features]
+r2 = ["aws-config", "aws-sdk-s3", "dashmap", "once_cell", "tokio/rt-multi-thread", "bytes", "aws-smithy-async"]
