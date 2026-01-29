@@ -5,3 +5,4 @@ mod r2_read_op;
 mod delete;
 mod exists;
 mod read;
+mod write;
