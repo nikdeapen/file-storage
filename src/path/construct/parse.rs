@@ -24,6 +24,11 @@ impl StoragePath {
             return Ok(unsafe { StoragePath::new(path, 3, file_separator) });
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(base_len) = crate::R2Path::base_len(s) {
+            return Ok(unsafe { StoragePath::new(path.into(), base_len, '/') });
+        }
+
         Err(Error::unknown_file_system(s))
     }
 }

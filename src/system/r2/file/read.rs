@@ -63,12 +63,15 @@ impl<'a> R2Path<'a> {
             }
             let mut total: usize = 0;
             loop {
+                let mut buffer: [u8; 4096] = [0; 4096];
                 let read: usize = read
-                    .read_async(target)
+                    .read_async(&mut buffer)
                     .await
                     .map_err(|error| Error::from_source(self.path.clone(), Read, error))?;
                 if read == 0 {
                     return Ok(Some(total));
+                } else {
+                    target.extend_from_slice(&buffer[..read]);
                 }
                 total += read;
             }

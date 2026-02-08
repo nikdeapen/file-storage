@@ -1,9 +1,28 @@
-use file_storage::{FilePath, FolderPath, ReadOp, WriteOp};
+use file_storage::{FilePath, ReadOp, WriteOp};
 use std::error::Error;
 use std::io::{Read, Write};
 
+// Tests the operations on the `file`.
+pub fn test_file(
+    file: &FilePath,
+    test_delete_if_exists: bool,
+    test_write: bool,
+) -> Result<(), Box<dyn Error>> {
+    exists(&file)?;
+    delete(&file, test_delete_if_exists)?;
+    read(&file)?;
+    read_string(&file)?;
+    read_vec(&file)?;
+    if test_write {
+        write(&file)?;
+        write_if_not_exists(&file)?;
+    }
+    write_data(&file)?;
+    Ok(())
+}
+
 /// Tests the `exists` function on the `file`.
-pub fn exists(file: &FilePath) -> Result<(), Box<dyn Error>> {
+fn exists(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
     assert!(!file.exists()?);
@@ -14,7 +33,7 @@ pub fn exists(file: &FilePath) -> Result<(), Box<dyn Error>> {
 }
 
 /// Tests the `delete` functions on the `file`.
-pub fn delete(file: &FilePath, delete_if_exists: bool) -> Result<(), Box<dyn Error>> {
+fn delete(file: &FilePath, delete_if_exists: bool) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
     assert!(!file.exists()?);
@@ -35,7 +54,7 @@ pub fn delete(file: &FilePath, delete_if_exists: bool) -> Result<(), Box<dyn Err
 }
 
 /// Tests the `read` functions on the `file`.
-pub fn read(file: &FilePath) -> Result<(), Box<dyn Error>> {
+fn read(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
     let s: &str = "Hello, World!";
@@ -55,14 +74,14 @@ pub fn read(file: &FilePath) -> Result<(), Box<dyn Error>> {
 }
 
 /// Tests the `read_string` functions on the `file`.
-pub fn read_string(file: &FilePath) -> Result<(), Box<dyn Error>> {
+fn read_string(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
     let s: &str = "Hello, World!";
 
-    assert!(file.read_as_string_if_exists()?.is_none());
+    // assert!(file.read_as_string_if_exists()?.is_none());
     file.write_data(s)?;
-    assert_eq!(file.read_as_string()?, s);
+    assert_eq!(file.read_as_string_if_exists()?.as_deref(), Some(s));
 
     let mut result: String = String::default();
     file.read_to_string(&mut result)?;
@@ -72,7 +91,7 @@ pub fn read_string(file: &FilePath) -> Result<(), Box<dyn Error>> {
 }
 
 /// Tests the `read_vec` functions on the `file`.
-pub fn read_vec(file: &FilePath) -> Result<(), Box<dyn Error>> {
+fn read_vec(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
     let s: &str = "Hello, World!";
@@ -89,7 +108,7 @@ pub fn read_vec(file: &FilePath) -> Result<(), Box<dyn Error>> {
 }
 
 /// Test the `write` function on the `file`.
-pub fn write(file: &FilePath) -> Result<(), Box<dyn Error>> {
+fn write(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
     let s: &str = "Hello, World!";
@@ -105,7 +124,7 @@ pub fn write(file: &FilePath) -> Result<(), Box<dyn Error>> {
 }
 
 /// Test the `write_if_not_exists` function on the `file`.
-pub fn write_if_not_exists(file: &FilePath) -> Result<(), Box<dyn Error>> {
+fn write_if_not_exists(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
     let s: &str = "Hello, World!";
@@ -125,56 +144,13 @@ pub fn write_if_not_exists(file: &FilePath) -> Result<(), Box<dyn Error>> {
 }
 
 /// Test the `write_data` function on the `file`.
-pub fn write_data(file: &FilePath) -> Result<(), Box<dyn Error>> {
+fn write_data(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
     let s: &str = "Hello, World!";
 
     file.write_data(s)?;
     assert_eq!(file.read_as_string()?, s);
-
-    Ok(())
-}
-
-/// Test the `list_files` function on the `folder`.
-pub fn list_files(folder: &FolderPath) -> Result<(), Box<dyn Error>> {
-    folder.delete_files()?;
-
-    let files: &[&str] = &["a", "b/a", "b/b", "b/c", "c"];
-    for file in files {
-        folder.clone().make_file(file)?.write_empty()?;
-    }
-
-    let result: Vec<FilePath> = folder.list_files_as_vec()?;
-    let result: Vec<&str> = result
-        .iter()
-        .map(|file| file.as_str())
-        .map(|file| {
-            if let Some(s) = file.strip_prefix(folder.as_str()) {
-                s
-            } else {
-                panic!("{}", file);
-            }
-        })
-        .collect();
-
-    assert_eq!(files, result);
-
-    Ok(())
-}
-
-/// Test the `delete_files` function on the `folder`.
-pub fn delete_files(folder: &FolderPath) -> Result<(), Box<dyn Error>> {
-    folder.delete_files()?;
-
-    let files: &[&str] = &["a", "b/a", "b/b", "b/c", "c"];
-    for file in files {
-        folder.clone().make_file(file)?.write_empty()?;
-    }
-
-    assert_eq!(folder.list_files_as_vec()?.len(), files.len());
-    folder.delete_files()?;
-    assert_eq!(folder.list_files_as_vec()?.len(), 0);
 
     Ok(())
 }

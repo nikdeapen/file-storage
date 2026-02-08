@@ -29,7 +29,7 @@ impl<'a> R2Path<'a> {
     pub const HTTPS_PREFIX: &'static str = "https://";
 
     /// The Cloudflare R2 prefix.
-    pub const R2_PREFIX: &'static str = ".r2.cloudflare.com/";
+    pub const R2_PREFIX: &'static str = ".r2.cloudflarestorage.com/";
 }
 
 impl<'a> R2Path<'a> {

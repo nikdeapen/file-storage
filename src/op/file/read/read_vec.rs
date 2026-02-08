@@ -52,6 +52,11 @@ impl FilePath {
             return path.read_to_vec_if_exists(target);
         }
 
+        #[cfg(feature = "r2")]
+        if let Some(path) = crate::R2Path::from(self.path()) {
+            return path.read_to_vec_if_exists(target);
+        }
+
         Err(Error::new(self.clone(), Read, UnknownFileSystem))
     }
 }
