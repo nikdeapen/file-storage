@@ -106,6 +106,7 @@ impl Iterator for R2ListFilesOp {
                     match result {
                         Ok(files) => {
                             self.files = files;
+                            self.files.reverse();
                             continue;
                         }
                         Err(error) => return Some(Err(error)),
