@@ -8,16 +8,16 @@ pub fn test_file(
     test_delete_if_exists: bool,
     test_write: bool,
 ) -> Result<(), Box<dyn Error>> {
-    exists(&file)?;
-    delete(&file, test_delete_if_exists)?;
-    read(&file)?;
-    read_string(&file)?;
-    read_vec(&file)?;
+    exists(file)?;
+    delete(file, test_delete_if_exists)?;
+    read(file)?;
+    read_string(file)?;
+    read_vec(file)?;
     if test_write {
-        write(&file)?;
-        write_if_not_exists(&file)?;
+        write(file)?;
+        write_if_not_exists(file)?;
     }
-    write_data(&file)?;
+    write_data(file)?;
     Ok(())
 }
 
@@ -64,8 +64,8 @@ fn read(file: &FilePath) -> Result<(), Box<dyn Error>> {
 
     let mut read: ReadOp = file.read()?;
     for b in s.as_bytes() {
-        let mut buffer: &mut [u8] = &mut [0u8];
-        read.read_exact(&mut buffer)?;
+        let buffer: &mut [u8] = &mut [0u8];
+        read.read_exact(buffer)?;
         assert_eq!(*b, buffer[0]);
     }
     assert_eq!(read.read(&mut [0u8])?, 0);
