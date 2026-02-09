@@ -1,4 +1,6 @@
+#[allow(dead_code)]
 mod file_util;
+#[allow(dead_code)]
 mod folder_util;
 
 #[cfg(feature = "r2")]

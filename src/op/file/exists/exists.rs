@@ -1,7 +1,7 @@
+use crate::LocalPath;
 use crate::Operation::Exists;
 use crate::Reason::UnknownFileSystem;
 use crate::{Error, FilePath};
-use crate::{LocalPath, R2Path};
 
 impl FilePath {
     //! Exists
@@ -13,7 +13,7 @@ impl FilePath {
         }
 
         #[cfg(feature = "r2")]
-        if let Some(path) = R2Path::from(self.path()) {
+        if let Some(path) = crate::R2Path::from(self.path()) {
             return path.exists();
         }
 
