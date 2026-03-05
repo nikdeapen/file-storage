@@ -5,7 +5,7 @@ impl StoragePath {
 
     /// Converts the path to a file path.
     ///
-    /// Returns `Err(self)` if the path is not a file path.
+    /// Returns `Err` if the path is not a file path.
     pub fn to_file(self) -> Result<FilePath, Error> {
         if self.is_file() {
             Ok(unsafe { FilePath::new(self) })

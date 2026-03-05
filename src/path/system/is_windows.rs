@@ -9,18 +9,23 @@ impl StoragePath {
     }
 
     /// Checks if the `path` is a Windows path.
+    ///
+    /// Matches drive letter paths (`C:\` or `C:/`) and UNC paths (`\\server\...`).
     pub fn is_windows_path_str<S>(path: S) -> bool
     where
         S: AsRef<str>,
     {
         let path: &str = path.as_ref();
-        if path.len() < 3 {
-            false
-        } else {
-            path.as_bytes()[0].is_ascii_alphabetic()
-                && path.as_bytes()[1] == b':'
-                && (path.as_bytes()[2] == b'\\' || path.as_bytes()[2] == b'/')
+        let bytes: &[u8] = path.as_bytes();
+        if bytes.len() < 3 {
+            return false;
         }
+        let is_drive_letter: bool = bytes[0].is_ascii_alphabetic()
+            && bytes[1] == b':'
+            && (bytes[2] == b'\\' || bytes[2] == b'/');
+        let is_unc: bool =
+            bytes[0] == b'\\' && bytes[1] == b'\\' && bytes[2] != b'\\';
+        is_drive_letter || is_unc
     }
 }
 

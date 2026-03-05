@@ -21,9 +21,7 @@ impl FilePath {
 
     /// Creates a temp file path. (does not create the file)
     pub fn temp() -> Result<FilePath, io::Error> {
-        StoragePath::temp()?
-            .make_file("temp.folder")
-            .map_err(|_| io::Error::other("¯\\_(ツ)_/¯"))
+        StoragePath::temp()?.to_file().map_err(Into::into)
     }
 }
 

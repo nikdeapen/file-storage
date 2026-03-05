@@ -1,23 +1,23 @@
 /// A file or folder path.
 ///
-/// # Base & Extension
-/// Storage paths are divided into a base and an extension. The base is effectively immutable, and
-/// the extension is a sequence of segments divided by file-separators.
+/// # Base & Relative Path
+/// Storage paths are divided into a base and a relative path. The base is effectively immutable,
+/// and the relative path is a sequence of segments divided by file-separators.
 ///
 /// Unix Example:
 /// Path:           /the/path
 /// Base:           /
-/// Extension:      the/path
+/// Relative Path:  the/path
 ///
 /// Windows Example:
 /// Path:           C:\The\Path
 /// Base:           C:\
-/// Extension:      The\Path
+/// Relative Path:  The\Path
 ///
 /// URL Example:
 /// Path:           https://example.com/the/path
 /// Base:           https://example.com/
-/// Extension:      the/path
+/// Relative Path:  the/path
 ///
 /// # Files & Folders
 /// A storage path can be a file path or a folder path. These are mutually exclusive and
