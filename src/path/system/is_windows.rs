@@ -46,3 +46,26 @@ impl FolderPath {
         StoragePath::is_windows_path_str(self.as_str())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::StoragePath;
+
+    #[test]
+    fn is_windows_path_str() {
+        // Drive letter paths.
+        assert!(StoragePath::is_windows_path_str("C:\\"));
+        assert!(StoragePath::is_windows_path_str("C:/"));
+        assert!(StoragePath::is_windows_path_str("D:\\folder\\file"));
+
+        // UNC paths.
+        assert!(StoragePath::is_windows_path_str("\\\\server\\share"));
+        assert!(StoragePath::is_windows_path_str("\\\\s\\share\\file"));
+
+        // Not Windows paths.
+        assert!(!StoragePath::is_windows_path_str("/unix/path"));
+        assert!(!StoragePath::is_windows_path_str("C:"));
+        assert!(!StoragePath::is_windows_path_str("\\\\\\bad"));
+        assert!(!StoragePath::is_windows_path_str("ab"));
+    }
+}

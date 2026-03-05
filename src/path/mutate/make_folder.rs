@@ -35,10 +35,7 @@ impl FilePath {
 
     /// Makes the file a folder by appending a file-separator.
     pub fn make_folder(self) -> FolderPath {
-        let mut path: StoragePath = self.to_path();
-        let file_separator: char = path.file_separator();
-        unsafe { path.path_mut().push(file_separator) };
-        path.to_folder().unwrap()
+        self.to_path().make_folder()
     }
 }
 

@@ -7,11 +7,11 @@ impl StoragePath {
 
     /// Creates a temp path.
     pub fn temp() -> Result<StoragePath, io::Error> {
-        let named: NamedTempFile = NamedTempFile::new()?;
-        if let Some(named) = named.path().to_str() {
-            Ok(StoragePath::parse(named)?)
+        let temp_file: NamedTempFile = NamedTempFile::new()?;
+        if let Some(path) = temp_file.path().to_str() {
+            Ok(StoragePath::parse(path)?)
         } else {
-            Err(Error::path_not_utf8(named.path()))
+            Err(Error::path_not_utf8(temp_file.path()))
         }
     }
 }

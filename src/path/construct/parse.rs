@@ -70,3 +70,92 @@ impl StoragePath {
         path.len()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::StoragePath;
+
+    #[test]
+    fn parse_drive_letter() {
+        let path: StoragePath = StoragePath::parse("C:\\folder\\file.txt").unwrap();
+        assert_eq!(path.path(), "C:\\folder\\file.txt");
+        assert_eq!(path.base(), "C:\\");
+        assert_eq!(path.relative_path(), "folder\\file.txt");
+        assert_eq!(path.file_separator(), '\\');
+        assert!(path.is_file());
+    }
+
+    #[test]
+    fn parse_drive_letter_normalizes_separators() {
+        let path: StoragePath = StoragePath::parse("C:/folder/file.txt").unwrap();
+        assert_eq!(path.path(), "C:\\folder\\file.txt");
+        assert_eq!(path.base(), "C:\\");
+        assert_eq!(path.file_separator(), '\\');
+    }
+
+    #[test]
+    fn parse_drive_letter_mixed_separators() {
+        let path: StoragePath = StoragePath::parse("C:\\folder/file.txt").unwrap();
+        assert_eq!(path.path(), "C:\\folder\\file.txt");
+    }
+
+    #[test]
+    fn parse_drive_letter_folder() {
+        let path: StoragePath = StoragePath::parse("C:\\folder\\").unwrap();
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_drive_letter_root() {
+        let path: StoragePath = StoragePath::parse("C:\\").unwrap();
+        assert_eq!(path.base(), "C:\\");
+        assert_eq!(path.relative_path(), "");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unc_path() {
+        let path: StoragePath = StoragePath::parse("\\\\server\\share\\file.txt").unwrap();
+        assert_eq!(path.base(), "\\\\server\\share\\");
+        assert_eq!(path.relative_path(), "file.txt");
+        assert_eq!(path.file_separator(), '\\');
+        assert!(path.is_file());
+    }
+
+    #[test]
+    fn parse_unc_folder() {
+        let path: StoragePath = StoragePath::parse("\\\\server\\share\\folder\\").unwrap();
+        assert_eq!(path.base(), "\\\\server\\share\\");
+        assert_eq!(path.relative_path(), "folder\\");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unc_root() {
+        let path: StoragePath = StoragePath::parse("\\\\server\\share\\").unwrap();
+        assert_eq!(path.base(), "\\\\server\\share\\");
+        assert_eq!(path.relative_path(), "");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unc_incomplete_no_share() {
+        let path: StoragePath = StoragePath::parse("\\\\server").unwrap();
+        assert_eq!(path.base(), "\\\\server");
+        assert_eq!(path.relative_path(), "");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unc_incomplete_no_share_separator() {
+        let path: StoragePath = StoragePath::parse("\\\\server\\share").unwrap();
+        assert_eq!(path.base(), "\\\\server\\share");
+        assert_eq!(path.relative_path(), "");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unknown_file_system() {
+        assert!(StoragePath::parse("not_a_path").is_err());
+    }
+}

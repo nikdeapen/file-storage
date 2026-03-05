@@ -13,7 +13,7 @@ impl StoragePath {
     where
         S: AsRef<str>,
     {
-        path.as_ref().starts_with("/")
+        path.as_ref().starts_with('/')
     }
 }
 
