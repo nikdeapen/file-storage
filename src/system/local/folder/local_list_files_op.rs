@@ -8,7 +8,7 @@ use std::path::Path;
 pub struct LocalListFilesOp {
     root: FolderPath,
     sorted: bool,
-    recursive: RecursiveOp,
+    stack: Vec<Vec<DirEntry>>,
 }
 
 impl LocalListFilesOp {
@@ -20,10 +20,7 @@ impl LocalListFilesOp {
         Ok(Self {
             root,
             sorted,
-            recursive: RecursiveOp {
-                recursive: None,
-                entries,
-            },
+            stack: vec![entries],
         })
     }
 }
@@ -76,129 +73,90 @@ impl LocalListFilesOp {
     }
 }
 
-impl Iterator for LocalListFilesOp {
-    type Item = Result<FilePath, Error>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.recursive.next(&self.root, self.sorted)
-    }
-}
-
-struct RecursiveOp {
-    recursive: Option<Box<RecursiveOp>>,
-    entries: Vec<DirEntry>,
-}
-
-impl RecursiveOp {
-    //! Next
-
-    /// Gets the next file path.
-    ///
-    /// Returns `None` when there are no remaining file paths.
-    fn next(&mut self, root: &FolderPath, sorted: bool) -> Option<Result<FilePath, Error>> {
-        match self.next_no_reset(root, sorted) {
-            None => None,
-            Some(result) => {
-                if result.is_err() {
-                    self.recursive = None;
-                    self.entries = Vec::default();
-                }
-                Some(result)
-            }
-        }
-    }
-
-    fn next_no_reset(
-        &mut self,
-        root: &FolderPath,
-        sorted: bool,
-    ) -> Option<Result<FilePath, Error>> {
-        loop {
-            if let Some(recursive) = &mut self.recursive {
-                if let Some(next) = recursive.next(root, sorted) {
-                    return Some(next);
-                } else {
-                    self.recursive = None;
-                }
-            } else if let Some(entry) = self.entries.pop() {
-                match entry.metadata() {
-                    Ok(metadata) => {
-                        if metadata.is_file() {
-                            return Some(Self::file_from_entry(root, &entry));
-                        } else if metadata.is_dir() {
-                            match LocalListFilesOp::read_dir(root, entry.path(), sorted) {
-                                Ok(entries) => {
-                                    let recursive: RecursiveOp = RecursiveOp {
-                                        recursive: None,
-                                        entries,
-                                    };
-                                    self.recursive = Some(Box::new(recursive));
-                                }
-                                Err(error) => return Some(Err(error)),
-                            }
-                        } else if metadata.is_symlink() {
-                            // todo -- symlink can result in forever loop, just treat as file?
-                            return Some(Err(Error::from_message(
-                                root.clone(),
-                                ListFiles,
-                                "symlink not yet supported",
-                            )));
-                        } else {
-                            return Some(Err(Error::from_message(
-                                root.clone(),
-                                ListFiles,
-                                format!("unknown entry type: {:?}", entry),
-                            )));
-                        }
-                    }
-                    Err(e) => {
-                        return Some(Err(Error::from_message(
-                            root.clone(),
-                            ListFiles,
-                            format!("error reading metadata: {}", e),
-                        )))
-                    }
-                }
-            } else if self.recursive.is_none() && self.entries.is_empty() {
-                return None;
-            }
-        }
-    }
-}
-
-impl RecursiveOp {
+impl LocalListFilesOp {
     //! Conversions
 
     /// Creates a file path from the `entry`.
     fn file_from_entry(root: &FolderPath, entry: &DirEntry) -> Result<FilePath, Error> {
-        debug_assert!(entry.file_type().unwrap().is_file());
-
-        if let Some(path) = entry.path().to_str() {
-            if path.starts_with(root.as_str()) {
-                let extension: &str = &path[root.len()..];
-                let file_path: StoragePath = root.clone_append(extension);
-                if let Ok(file_path) = file_path.to_file() {
-                    Ok(file_path)
-                } else {
-                    Err(Error::from_message(
-                        root.clone(),
-                        ListFiles,
-                        format!("local file not a file path: {}", path),
-                    ))
-                }
-            } else {
-                Err(Error::from_message(
-                    root.clone(),
-                    ListFiles,
-                    format!("the file path is not in the original folder: {}", root),
-                ))
-            }
-        } else {
-            Err(Error::from_message(
+        let path_buf = entry.path();
+        let path: &str = path_buf.to_str().ok_or_else(|| {
+            Error::from_message(root.clone(), ListFiles, "the file path is not UTF-8")
+        })?;
+        let relative: &str = path.strip_prefix(root.as_str()).ok_or_else(|| {
+            Error::from_message(
                 root.clone(),
                 ListFiles,
-                "the file path is not UTF-8",
-            ))
+                format!("the file path is not in the original folder: {}", root),
+            )
+        })?;
+        let file_path: StoragePath = root.clone_append(relative);
+        file_path.to_file().map_err(|error| {
+            Error::from_message(
+                root.clone(),
+                ListFiles,
+                format!("local file not a file path: {}", error.path()),
+            )
+        })
+    }
+}
+
+impl Iterator for LocalListFilesOp {
+    type Item = Result<FilePath, Error>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.next_inner() {
+            Some(Err(error)) => {
+                self.stack.clear();
+                Some(Err(error))
+            }
+            other => other,
+        }
+    }
+}
+
+impl LocalListFilesOp {
+    fn next_inner(&mut self) -> Option<Result<FilePath, Error>> {
+        loop {
+            let entries: &mut Vec<DirEntry> = self.stack.last_mut()?;
+            let Some(entry) = entries.pop() else {
+                self.stack.pop();
+                continue;
+            };
+            match entry.metadata() {
+                Ok(metadata) => {
+                    if metadata.is_file() {
+                        return Some(Self::file_from_entry(&self.root, &entry));
+                    } else if metadata.is_dir() {
+                        match Self::read_dir(&self.root, entry.path(), self.sorted) {
+                            Ok(entries) => {
+                                self.stack.push(entries);
+                                continue;
+                            }
+                            Err(error) => return Some(Err(error)),
+                        }
+                    } else if metadata.is_symlink() {
+                        // todo -- symlink can result in forever loop
+                        return Some(Err(Error::from_message(
+                            self.root.clone(),
+                            ListFiles,
+                            "symlink not yet supported",
+                        )));
+                    } else {
+                        return Some(Err(Error::from_message(
+                            self.root.clone(),
+                            ListFiles,
+                            format!("unknown entry type: {:?}", entry),
+                        )));
+                    }
+                }
+                Err(e) => {
+                    return Some(Err(Error::from_message(
+                        self.root.clone(),
+                        ListFiles,
+                        format!("error reading metadata: {}", e),
+                    )))
+                }
+            }
         }
     }
 }
