@@ -1,4 +1,4 @@
-use crate::{FilePath, FolderPath, StoragePath};
+use crate::StoragePath;
 
 impl StoragePath {
     //! Is System
@@ -26,24 +26,6 @@ impl StoragePath {
         let is_unc: bool =
             bytes[0] == b'\\' && bytes[1] == b'\\' && bytes[2] != b'\\';
         is_drive_letter || is_unc
-    }
-}
-
-impl FilePath {
-    //! Is System
-
-    /// Checks if the path is a Windows path.
-    pub fn is_windows_path(&self) -> bool {
-        StoragePath::is_windows_path_str(self.as_str())
-    }
-}
-
-impl FolderPath {
-    //! Is System
-
-    /// Checks if the path is a Windows path.
-    pub fn is_windows_path(&self) -> bool {
-        StoragePath::is_windows_path_str(self.as_str())
     }
 }
 

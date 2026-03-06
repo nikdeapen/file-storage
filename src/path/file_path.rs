@@ -1,9 +1,18 @@
 use crate::StoragePath;
+use std::ops::Deref;
 
 /// A file path.
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
 pub struct FilePath {
     path: StoragePath,
+}
+
+impl Deref for FilePath {
+    type Target = StoragePath;
+
+    fn deref(&self) -> &StoragePath {
+        &self.path
+    }
 }
 
 impl FilePath {
