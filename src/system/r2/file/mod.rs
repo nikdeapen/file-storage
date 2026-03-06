@@ -1,6 +1,8 @@
 pub use r2_read_op::*;
+pub use r2_write_op::*;
 
 mod r2_read_op;
+mod r2_write_op;
 
 mod delete;
 mod exists;

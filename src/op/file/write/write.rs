@@ -22,7 +22,9 @@ impl FilePath {
         }
     }
 
-    /// Opens a write operation to the file if it exists.
+    /// Opens a write operation to create a new file.
+    ///
+    /// Returns `Ok(None)` if the file already exists.
     pub fn write_if_not_exists(&self) -> Result<Option<WriteOp>, Error> {
         if let Some(path) = LocalPath::from(self.path()) {
             return path.write_if_not_exists().map(|op| {
@@ -33,13 +35,12 @@ impl FilePath {
         }
 
         #[cfg(feature = "r2")]
-        if crate::R2Path::from(self.path()).is_some() {
-            // todo -- r2 write operations
-            return Err(Error::new(
-                self.path().clone(),
-                Write,
-                Reason::UnsupportedOperation,
-            ));
+        if let Some(path) = crate::R2Path::from(self.path()) {
+            return path.write_if_not_exists().map(|op| {
+                op.map(|op| WriteOp {
+                    inner: WriteOpInner::R2(op),
+                })
+            });
         }
 
         Err(Error::new(
