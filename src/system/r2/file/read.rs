@@ -33,6 +33,7 @@ impl<'a> R2Path<'a> {
         }
     }
 
+    /// See `FilePath::read_if_exists`.
     async fn read_if_exists_async(&self) -> Result<Option<R2ReadOp>, Error> {
         if let Some(object) = self.get_object_output().await? {
             Ok(Some(R2ReadOp::from(object)))
@@ -41,6 +42,7 @@ impl<'a> R2Path<'a> {
         }
     }
 
+    /// See `FilePath::read_if_exists`.
     pub fn read_if_exists(&self) -> Result<Option<R2ReadOp>, Error> {
         RUNTIME.block_on(self.read_if_exists_async())
     }

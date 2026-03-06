@@ -40,17 +40,9 @@ impl R2ReadOp {
     }
 
     fn read_from_current(&mut self, target: &mut [u8]) -> usize {
-        let copied: usize = if self.current.len() <= target.len() {
-            let copied: usize = self.current.len();
-            self.current
-                .copy_to_slice(&mut target[..self.current.len()]);
-            copied
-        } else {
-            let copied: usize = target.len();
-            self.current.copy_to_slice(&mut target[..]);
-            copied
-        };
-        copied
+        let len: usize = self.current.len().min(target.len());
+        self.current.copy_to_slice(&mut target[..len]);
+        len
     }
 }
 
