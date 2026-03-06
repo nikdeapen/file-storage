@@ -7,26 +7,28 @@ impl StoragePath {
     ///
     /// Returns the path as is if it is already a folder, otherwise appends a file-separator.
     pub fn clone_make_folder(&self) -> FolderPath {
-        if self.is_folder() {
-            self.clone().to_folder().unwrap()
+        let path: StoragePath = if self.is_folder() {
+            self.clone()
         } else {
             self.clone_with_extra_capacity(self.file_separator().len_utf8())
                 .with_appended_char(self.file_separator())
-                .to_folder()
-                .unwrap()
-        }
+        };
+        // Safety: path is already a folder or we appended the file separator.
+        unsafe { FolderPath::new(path) }
     }
 
     /// Makes the storage path a folder.
     ///
     /// Returns the path as is if it is already a folder, otherwise appends a file-separator.
     pub fn make_folder(self) -> FolderPath {
-        if self.is_folder() {
-            self.to_folder().unwrap()
+        let path: StoragePath = if self.is_folder() {
+            self
         } else {
             let fs: char = self.file_separator();
-            self.with_appended_char(fs).to_folder().unwrap()
-        }
+            self.with_appended_char(fs)
+        };
+        // Safety: path is already a folder or we appended the file separator.
+        unsafe { FolderPath::new(path) }
     }
 }
 
@@ -35,10 +37,7 @@ impl FilePath {
 
     /// Makes the file a folder by appending a file-separator.
     pub fn make_folder(self) -> FolderPath {
-        let mut path: StoragePath = self.to_path();
-        let file_separator: char = path.file_separator();
-        unsafe { path.path_mut().push(file_separator) };
-        path.to_folder().unwrap()
+        self.to_path().make_folder()
     }
 }
 

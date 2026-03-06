@@ -1,4 +1,4 @@
-use crate::{FilePath, FolderPath, StoragePath};
+use crate::StoragePath;
 
 impl StoragePath {
     //! Append Char
@@ -15,27 +15,9 @@ impl StoragePath {
     }
 }
 
-impl FilePath {
-    //! Append Char
-
-    /// Appends the char.
-    pub fn with_appended_char(self, c: char) -> StoragePath {
-        self.to_path().with_appended_char(c)
-    }
-}
-
-impl FolderPath {
-    //! Append Char
-
-    /// Appends the char.
-    pub fn with_appended_char(self, c: char) -> StoragePath {
-        self.to_path().with_appended_char(c)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::{FilePath, FolderPath, StoragePath};
+    use crate::{FolderPath, StoragePath};
     use std::error::Error;
 
     #[test]
@@ -44,12 +26,12 @@ mod tests {
         let result: StoragePath = path.with_appended_char('c');
         assert_eq!(result.as_str(), "/c");
 
-        let file: FilePath = FolderPath::unix_root().make_file("file")?;
-        let result: StoragePath = file.with_appended_char('c');
+        let file = FolderPath::unix_root().make_file("file")?;
+        let result: StoragePath = file.to_path().with_appended_char('c');
         assert_eq!(result.as_str(), "/filec");
 
         let folder: FolderPath = FolderPath::unix_root();
-        let result: StoragePath = folder.with_appended_char('c');
+        let result: StoragePath = folder.to_path().with_appended_char('c');
         assert_eq!(result.as_str(), "/c");
 
         Ok(())

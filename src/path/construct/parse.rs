@@ -14,21 +14,148 @@ impl StoragePath {
         if StoragePath::is_unix_path_str(s) {
             return Ok(unsafe { StoragePath::new(path, 1, '/') });
         } else if StoragePath::is_windows_path_str(s) {
-            // todo -- refactor windows paths
-            // Windows paths are rather poorly designed. I am not sure if I want to normalize the
-            // path case and file-separators here or keep it as is and handle de-duplication and
-            // other logic in other places. I am also not sure if I should have equality be
-            // case-insensitive. I don't use this 🗑🔥 of an OS so I will address this later.
-            // todo -- this logic is very interdependent and should be refactored as well
-            let file_separator: char = s.as_bytes()[2] as char;
-            return Ok(unsafe { StoragePath::new(path, 3, file_separator) });
+            return Ok(Self::parse_windows(path.into()));
         }
 
         #[cfg(feature = "r2")]
         if let Some(base_len) = crate::R2Path::base_len(s) {
-            return Ok(unsafe { StoragePath::new(path.into(), base_len, '/') });
+            return Ok(unsafe { StoragePath::new(path, base_len, '/') });
         }
 
         Err(Error::unknown_file_system(s))
+    }
+
+    /// Parses a Windows path, normalizing file separators to `\`.
+    fn parse_windows(mut path: String) -> Self {
+        // Safety: replacing `/` (1 byte) with `\` (1 byte) preserves UTF-8 validity.
+        unsafe {
+            for byte in path.as_bytes_mut() {
+                if *byte == b'/' {
+                    *byte = b'\\';
+                }
+            }
+        }
+        let base_len: usize = Self::windows_base_len(&path);
+        unsafe { StoragePath::new(path, base_len, '\\') }
+    }
+
+    /// Computes the base length for a normalized Windows path.
+    ///
+    /// Expects all file separators to already be normalized to `\`.
+    fn windows_base_len(path: &str) -> usize {
+        let bytes: &[u8] = path.as_bytes();
+
+        // Drive letter path (C:\): base is the first 3 bytes.
+        if bytes.len() >= 3
+            && bytes[0].is_ascii_alphabetic()
+            && bytes[1] == b':'
+            && bytes[2] == b'\\'
+        {
+            return 3;
+        }
+
+        // UNC path (\\server\share\): base includes up to and including the share separator.
+        if bytes.len() >= 3 && bytes[0] == b'\\' && bytes[1] == b'\\' {
+            if let Some(server_end) = path[2..].find('\\') {
+                let share_start: usize = 2 + server_end + 1;
+                if share_start < path.len() {
+                    if let Some(share_end) = path[share_start..].find('\\') {
+                        return share_start + share_end + 1;
+                    }
+                }
+            }
+        }
+
+        // Incomplete or unrecognized structure: use the entire path as the base.
+        path.len()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::StoragePath;
+
+    #[test]
+    fn parse_drive_letter() {
+        let path: StoragePath = StoragePath::parse("C:\\folder\\file.txt").unwrap();
+        assert_eq!(path.path(), "C:\\folder\\file.txt");
+        assert_eq!(path.base_path(), "C:\\");
+        assert_eq!(path.relative_path(), "folder\\file.txt");
+        assert_eq!(path.file_separator(), '\\');
+        assert!(path.is_file());
+    }
+
+    #[test]
+    fn parse_drive_letter_normalizes_separators() {
+        let path: StoragePath = StoragePath::parse("C:/folder/file.txt").unwrap();
+        assert_eq!(path.path(), "C:\\folder\\file.txt");
+        assert_eq!(path.base_path(), "C:\\");
+        assert_eq!(path.file_separator(), '\\');
+    }
+
+    #[test]
+    fn parse_drive_letter_mixed_separators() {
+        let path: StoragePath = StoragePath::parse("C:\\folder/file.txt").unwrap();
+        assert_eq!(path.path(), "C:\\folder\\file.txt");
+    }
+
+    #[test]
+    fn parse_drive_letter_folder() {
+        let path: StoragePath = StoragePath::parse("C:\\folder\\").unwrap();
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_drive_letter_root() {
+        let path: StoragePath = StoragePath::parse("C:\\").unwrap();
+        assert_eq!(path.base_path(), "C:\\");
+        assert_eq!(path.relative_path(), "");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unc_path() {
+        let path: StoragePath = StoragePath::parse("\\\\server\\share\\file.txt").unwrap();
+        assert_eq!(path.base_path(), "\\\\server\\share\\");
+        assert_eq!(path.relative_path(), "file.txt");
+        assert_eq!(path.file_separator(), '\\');
+        assert!(path.is_file());
+    }
+
+    #[test]
+    fn parse_unc_folder() {
+        let path: StoragePath = StoragePath::parse("\\\\server\\share\\folder\\").unwrap();
+        assert_eq!(path.base_path(), "\\\\server\\share\\");
+        assert_eq!(path.relative_path(), "folder\\");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unc_root() {
+        let path: StoragePath = StoragePath::parse("\\\\server\\share\\").unwrap();
+        assert_eq!(path.base_path(), "\\\\server\\share\\");
+        assert_eq!(path.relative_path(), "");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unc_incomplete_no_share() {
+        let path: StoragePath = StoragePath::parse("\\\\server").unwrap();
+        assert_eq!(path.base_path(), "\\\\server");
+        assert_eq!(path.relative_path(), "");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unc_incomplete_no_share_separator() {
+        let path: StoragePath = StoragePath::parse("\\\\server\\share").unwrap();
+        assert_eq!(path.base_path(), "\\\\server\\share");
+        assert_eq!(path.relative_path(), "");
+        assert!(path.is_folder());
+    }
+
+    #[test]
+    fn parse_unknown_file_system() {
+        assert!(StoragePath::parse("not_a_path").is_err());
     }
 }

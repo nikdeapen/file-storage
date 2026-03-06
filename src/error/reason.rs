@@ -18,6 +18,9 @@ pub enum Reason {
     /// The file content was not properly encoded UTF-8.
     FileContentNotUTF8,
 
+    /// The path is invalid for the operation.
+    InvalidPath,
+
     /// Another uncategorized reason.
     // todo -- remove this and have Option<Reason> in the error?
     Other,
@@ -31,6 +34,7 @@ impl Display for Reason {
             Reason::FileNotFound => "file not found",
             Reason::FileAlreadyExists => "file already exists",
             Reason::FileContentNotUTF8 => "file content not utf-8",
+            Reason::InvalidPath => "invalid path",
             Reason::Other => "other",
         };
         write!(f, "{}", s)

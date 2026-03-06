@@ -1,5 +1,6 @@
 use crate::{FilePath, FolderPath, StoragePath};
 
+#[allow(clippy::len_without_is_empty)]
 impl StoragePath {
     //! Length
 
@@ -7,13 +8,9 @@ impl StoragePath {
     pub fn len(&self) -> usize {
         self.path().len()
     }
-
-    /// Checks if the path is empty.
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
 }
 
+#[allow(clippy::len_without_is_empty)]
 impl FilePath {
     //! Length
 
@@ -21,24 +18,15 @@ impl FilePath {
     pub fn len(&self) -> usize {
         self.path().len()
     }
-
-    /// Checks if the path is empty.
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
-    }
 }
 
+#[allow(clippy::len_without_is_empty)]
 impl FolderPath {
     //! Length
 
     /// Gets the path length. (in bytes)
     pub fn len(&self) -> usize {
         self.path().len()
-    }
-
-    /// Checks if the path is empty.
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
     }
 }
 

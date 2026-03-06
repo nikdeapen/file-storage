@@ -1,27 +1,27 @@
 /// A file or folder path.
 ///
-/// # Base & Extension
-/// Storage paths are divided into a base and an extension. The base is effectively immutable, and
-/// the extension is a sequence of segments divided by file-separators.
+/// # Base Path & Relative Path
+/// Storage paths are divided into a base path and a relative path. The base path is effectively
+/// immutable, and the relative path is a sequence of segments divided by file-separators.
 ///
 /// Unix Example:
 /// Path:           /the/path
-/// Base:           /
-/// Extension:      the/path
+/// Base Path:      /
+/// Relative Path:  the/path
 ///
 /// Windows Example:
 /// Path:           C:\The\Path
-/// Base:           C:\
-/// Extension:      The\Path
+/// Base Path:      C:\
+/// Relative Path:  The\Path
 ///
 /// URL Example:
 /// Path:           https://example.com/the/path
-/// Base:           https://example.com/
-/// Extension:      the/path
+/// Base Path:      https://example.com/
+/// Relative Path:  the/path
 ///
 /// # Files & Folders
 /// A storage path can be a file path or a folder path. These are mutually exclusive and
-/// exhaustive. A storage path is a folder path if it is equal to its base or ends with a
+/// exhaustive. A storage path is a folder path if it is equal to its base path or ends with a
 /// file-separator, otherwise it is a file path. This invariant can be broken with `unsafe`.
 #[derive(Clone, Debug)]
 pub struct StoragePath {

@@ -1,4 +1,4 @@
-use crate::{FilePath, FolderPath, StoragePath};
+use crate::StoragePath;
 
 impl StoragePath {
     //! Is System
@@ -13,24 +13,6 @@ impl StoragePath {
     where
         S: AsRef<str>,
     {
-        path.as_ref().starts_with("/")
-    }
-}
-
-impl FilePath {
-    //! Is System
-
-    /// Checks if the path is a Unix path.
-    pub fn is_unix_path(&self) -> bool {
-        StoragePath::is_unix_path_str(self.as_str())
-    }
-}
-
-impl FolderPath {
-    //! Is System
-
-    /// Checks if the path is a Unix path.
-    pub fn is_unix_path(&self) -> bool {
-        StoragePath::is_unix_path_str(self.as_str())
+        path.as_ref().starts_with('/')
     }
 }

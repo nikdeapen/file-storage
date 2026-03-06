@@ -7,11 +7,11 @@ impl StoragePath {
 
     /// Creates a temp path.
     pub fn temp() -> Result<StoragePath, io::Error> {
-        let named: NamedTempFile = NamedTempFile::new()?;
-        if let Some(named) = named.path().to_str() {
-            Ok(StoragePath::parse(named)?)
+        let temp_file: NamedTempFile = NamedTempFile::new()?;
+        if let Some(path) = temp_file.path().to_str() {
+            Ok(StoragePath::parse(path)?)
         } else {
-            Err(Error::path_not_utf8(named.path()))
+            Err(Error::path_not_utf8(temp_file.path()))
         }
     }
 }
@@ -21,9 +21,7 @@ impl FilePath {
 
     /// Creates a temp file path. (does not create the file)
     pub fn temp() -> Result<FilePath, io::Error> {
-        StoragePath::temp()?
-            .make_file("temp.folder")
-            .map_err(|_| io::Error::other("¯\\_(ツ)_/¯"))
+        StoragePath::temp()?.to_file().map_err(Into::into)
     }
 }
 

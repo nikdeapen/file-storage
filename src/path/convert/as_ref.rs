@@ -34,15 +34,6 @@ impl AsRef<StoragePath> for StoragePath {
     }
 }
 
-impl FilePath {
-    //! AsRef
-
-    /// Gets the path as a string.
-    pub fn as_str(&self) -> &str {
-        self.path().path()
-    }
-}
-
 impl AsRef<str> for FilePath {
     fn as_ref(&self) -> &str {
         self.as_str()
@@ -64,15 +55,6 @@ impl AsRef<OsStr> for FilePath {
 impl AsRef<FilePath> for FilePath {
     fn as_ref(&self) -> &FilePath {
         self
-    }
-}
-
-impl FolderPath {
-    //! AsRef
-
-    /// Gets the path as a string.
-    pub fn as_str(&self) -> &str {
-        self.path().path()
     }
 }
 

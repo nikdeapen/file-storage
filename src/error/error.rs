@@ -117,6 +117,7 @@ impl From<Error> for io::Error {
             Reason::FileNotFound => ErrorKind::NotFound,
             Reason::FileAlreadyExists => ErrorKind::AlreadyExists,
             Reason::FileContentNotUTF8 => ErrorKind::InvalidData,
+            Reason::InvalidPath => ErrorKind::InvalidInput,
             Reason::Other => ErrorKind::Other,
         };
         Self::new(kind, error)
