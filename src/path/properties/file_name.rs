@@ -16,23 +16,17 @@ impl FilePath {
 
 #[cfg(test)]
 mod tests {
-    use crate::{FolderPath, StoragePath};
-    use std::error::Error;
+    use crate::StoragePath;
 
     #[test]
-    fn file_name() -> Result<(), Box<dyn Error>> {
-        let root: FolderPath = FolderPath::unix_root();
-
-        let file = root.clone().make_file("file.txt")?;
+    fn file_name() {
+        let file = StoragePath::parse("/file.txt").unwrap().to_file().unwrap();
         assert_eq!(file.file_name(), "file.txt");
 
-        let folder: FolderPath = StoragePath::parse("/foo/bar/")?.to_folder()?;
-        let file = folder.make_file("data.json")?;
+        let file = StoragePath::parse("/foo/bar/data.json").unwrap().to_file().unwrap();
         assert_eq!(file.file_name(), "data.json");
 
-        let file = root.make_file("solo")?;
+        let file = StoragePath::parse("/solo").unwrap().to_file().unwrap();
         assert_eq!(file.file_name(), "solo");
-
-        Ok(())
     }
 }

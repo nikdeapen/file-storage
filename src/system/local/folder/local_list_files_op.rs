@@ -135,12 +135,7 @@ impl LocalListFilesOp {
                             Err(error) => return Some(Err(error)),
                         }
                     } else if metadata.is_symlink() {
-                        // todo -- symlink can result in forever loop
-                        return Some(Err(Error::from_message(
-                            self.root.clone(),
-                            ListFiles,
-                            "symlink not yet supported",
-                        )));
+                        continue;
                     } else {
                         return Some(Err(Error::from_message(
                             self.root.clone(),

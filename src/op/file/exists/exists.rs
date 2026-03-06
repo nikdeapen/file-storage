@@ -8,12 +8,12 @@ impl FilePath {
 
     /// Checks if the file exists.
     pub fn exists(&self) -> Result<bool, Error> {
-        if let Some(path) = LocalPath::from(self.path()) {
+        if let Some(path) = LocalPath::new(self.path()) {
             return path.exists();
         }
 
         #[cfg(feature = "r2")]
-        if let Some(path) = crate::R2Path::from(self.path()) {
+        if let Some(path) = crate::R2Path::new(self.path()) {
             return path.exists();
         }
 

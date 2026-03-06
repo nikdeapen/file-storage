@@ -8,12 +8,12 @@ impl FolderPath {
 
     /// Deletes all files in the folder recursively.
     pub fn delete_files(&self) -> Result<(), Error> {
-        if let Some(path) = LocalPath::from(self.path()) {
+        if let Some(path) = LocalPath::new(self.path()) {
             return path.delete_files();
         }
 
         #[cfg(feature = "r2")]
-        if let Some(path) = crate::R2Path::from(self.path()) {
+        if let Some(path) = crate::R2Path::new(self.path()) {
             return path.delete_files();
         }
 

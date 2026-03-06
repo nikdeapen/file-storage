@@ -75,7 +75,7 @@ impl<'a> R2Path<'a> {
     }
 
     /// Parses a Cloudflare R2 path from the `path`.
-    pub fn from(path: &'a StoragePath) -> Option<Self> {
+    pub fn new(path: &'a StoragePath) -> Option<Self> {
         if let Some((account_id, bucket, key)) = Self::parse_parts(path.path()) {
             Some(Self {
                 path,

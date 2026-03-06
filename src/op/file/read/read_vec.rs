@@ -48,12 +48,12 @@ impl FilePath {
     /// Returns `Ok(Some(file_content_len))`.
     /// Returns `Ok(None)` if the file did not exist.
     pub fn read_to_vec_if_exists(&self, target: &mut Vec<u8>) -> Result<Option<usize>, Error> {
-        if let Some(path) = LocalPath::from(self.path()) {
+        if let Some(path) = LocalPath::new(self.path()) {
             return path.read_to_vec_if_exists(target);
         }
 
         #[cfg(feature = "r2")]
-        if let Some(path) = crate::R2Path::from(self.path()) {
+        if let Some(path) = crate::R2Path::new(self.path()) {
             return path.read_to_vec_if_exists(target);
         }
 

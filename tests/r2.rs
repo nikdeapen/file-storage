@@ -21,7 +21,7 @@ mod tests {
         let folder: FolderPath = folder
             .with_appended(Utc::now().format("%Y%m%d-%H%M%S").to_string())
             .make_folder();
-        let file: FilePath = folder.make_file("test.file")?;
+        let file: FilePath = folder.to_path().with_appended("test.file").to_file()?;
 
         file_util::test_file(&file, false, false)?;
 

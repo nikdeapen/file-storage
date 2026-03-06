@@ -11,14 +11,14 @@ impl FolderPath {
     ///
     /// The files will be returned in lexicographical order.
     pub fn list_files(&self) -> Result<ListFilesOp, Error> {
-        if let Some(path) = LocalPath::from(self.path()) {
+        if let Some(path) = LocalPath::new(self.path()) {
             return path.list_files().map(|op| ListFilesOp {
                 inner: ListFilesOpInner::Local(op),
             });
         }
 
         #[cfg(feature = "r2")]
-        if let Some(path) = crate::R2Path::from(self.path()) {
+        if let Some(path) = crate::R2Path::new(self.path()) {
             return path.list_files().map(|op| ListFilesOp {
                 inner: ListFilesOpInner::R2(op),
             });
@@ -33,14 +33,14 @@ impl FolderPath {
 
     /// Creates a list-files operation on the folder where the files may be unsorted.
     pub fn list_files_unsorted(&self) -> Result<ListFilesOp, Error> {
-        if let Some(path) = LocalPath::from(self.path()) {
+        if let Some(path) = LocalPath::new(self.path()) {
             return path.list_files_unsorted().map(|op| ListFilesOp {
                 inner: ListFilesOpInner::Local(op),
             });
         }
 
         #[cfg(feature = "r2")]
-        if let Some(path) = crate::R2Path::from(self.path()) {
+        if let Some(path) = crate::R2Path::new(self.path()) {
             return path.list_files().map(|op| ListFilesOp {
                 inner: ListFilesOpInner::R2(op),
             });

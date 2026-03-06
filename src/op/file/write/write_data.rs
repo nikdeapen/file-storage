@@ -34,7 +34,7 @@ impl FilePath {
         D: AsRef<[u8]>,
     {
         #[cfg(feature = "r2")]
-        if let Some(path) = crate::R2Path::from(self.path()) {
+        if let Some(path) = crate::R2Path::new(self.path()) {
             return path.write_data_if_not_exists(data);
         }
 
