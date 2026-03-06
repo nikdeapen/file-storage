@@ -1,15 +1,22 @@
-use crate::{Error, FolderPath, ListFilesOp};
+use crate::system::LocalPath;
+use crate::Operation::Delete;
+use crate::Reason::UnknownFileSystem;
+use crate::{Error, FolderPath};
 
 impl FolderPath {
     //! Delete Files
 
-    /// Deletes the files in the folder.
+    /// Deletes all files in the folder recursively.
     pub fn delete_files(&self) -> Result<(), Error> {
-        // todo -- this can be more performant on most systems
-        let files: ListFilesOp = self.list_files()?;
-        for file in files {
-            file?.delete()?;
+        if let Some(path) = LocalPath::from(self.path()) {
+            return path.delete_files();
         }
-        Ok(())
+
+        #[cfg(feature = "r2")]
+        if let Some(path) = crate::R2Path::from(self.path()) {
+            return path.delete_files();
+        }
+
+        Err(Error::new(self.path().clone(), Delete, UnknownFileSystem))
     }
 }
