@@ -1,16 +1,12 @@
 use crate::StoragePath;
 
+#[allow(clippy::len_without_is_empty)]
 impl StoragePath {
     //! Length
 
     /// Gets the path length. (in bytes)
     pub fn len(&self) -> usize {
         self.path().len()
-    }
-
-    /// Checks if the path is empty.
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
     }
 }
 

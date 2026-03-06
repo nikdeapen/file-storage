@@ -13,7 +13,7 @@ impl FolderPath {
         } else {
             let original_len: usize = path.len() - file_name.len();
             let path: StoragePath = unsafe { path.truncated(original_len) };
-            Err(Error::new(path, Operation::ModifyPath, Reason::Other))
+            Err(Error::new(path, Operation::ModifyPath, Reason::InvalidPath))
         }
     }
 }
