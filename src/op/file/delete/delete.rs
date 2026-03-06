@@ -9,12 +9,16 @@ impl FilePath {
     ///
     /// Returns `Ok(())` if the file was deleted or if the file did not exist.
     pub fn delete(&self) -> Result<(), Error> {
+        if let Some(path) = LocalPath::from(self.path()) {
+            return path.delete_if_exists().map(|_| ());
+        }
+
         #[cfg(feature = "r2")]
         if let Some(path) = crate::R2Path::from(self.path()) {
             return path.delete();
         }
 
-        self.delete_if_exists().map(|_| ())
+        Err(Error::new(self.clone(), Delete, Reason::UnknownFileSystem))
     }
 
     /// Deletes the file if it exists.
