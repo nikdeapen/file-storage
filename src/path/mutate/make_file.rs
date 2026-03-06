@@ -7,13 +7,11 @@ impl FolderPath {
     ///
     /// Returns `Err` if the `file_name` is empty or ends with the file-separator.
     pub fn make_file(self, file_name: &str) -> Result<FilePath, Error> {
-        let path: StoragePath = self.to_path().with_appended(file_name);
-        if path.is_file() {
-            path.to_file()
+        if file_name.is_empty() || file_name.ends_with(self.file_separator()) {
+            Err(Error::new(self, Operation::ModifyPath, Reason::InvalidPath))
         } else {
-            let original_len: usize = path.len() - file_name.len();
-            let path: StoragePath = unsafe { path.truncated(original_len) };
-            Err(Error::new(path, Operation::ModifyPath, Reason::InvalidPath))
+            let path: StoragePath = self.to_path().with_appended(file_name);
+            Ok(unsafe { FilePath::new(path) })
         }
     }
 }
