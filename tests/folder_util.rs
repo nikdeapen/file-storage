@@ -7,7 +7,7 @@ pub fn list_files(folder: &FolderPath) -> Result<(), Box<dyn Error>> {
 
     let files: &[&str] = &["a", "b/a", "b/b", "b/c", "c"];
     for file in files {
-        folder.clone().make_file(file)?.write_empty()?;
+        folder.clone().to_path().with_appended(file).to_file()?.write_empty()?;
     }
 
     let result: Vec<FilePath> = folder.list_files_as_vec()?;
@@ -34,7 +34,7 @@ pub fn delete_files(folder: &FolderPath) -> Result<(), Box<dyn Error>> {
 
     let files: &[&str] = &["a", "b/a", "b/b", "b/c", "c"];
     for file in files {
-        folder.clone().make_file(file)?.write_empty()?;
+        folder.clone().to_path().with_appended(file).to_file()?.write_empty()?;
     }
 
     assert_eq!(folder.list_files_as_vec()?.len(), files.len());

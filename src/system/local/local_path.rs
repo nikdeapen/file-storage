@@ -12,7 +12,7 @@ impl<'a> LocalPath<'a> {
     /// Creates a local path from the storage `path`.
     ///
     /// Returns `None` if the `path` is not a local path.
-    pub fn from(path: &'a StoragePath) -> Option<Self> {
+    pub fn new(path: &'a StoragePath) -> Option<Self> {
         if path.is_local_path() {
             Some(Self { path })
         } else {

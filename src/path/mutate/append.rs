@@ -34,23 +34,20 @@ impl StoragePath {
 
 #[cfg(test)]
 mod tests {
-    use crate::{FolderPath, StoragePath};
-    use std::error::Error;
+    use crate::StoragePath;
 
     #[test]
-    fn append() -> Result<(), Box<dyn Error>> {
+    fn append() {
         let path: StoragePath = StoragePath::unix_root();
         let result: StoragePath = path.with_appended("folder.txt");
         assert_eq!(result.as_str(), "/folder.txt");
 
-        let file = FolderPath::unix_root().make_file("folder")?;
-        let result: StoragePath = file.to_path().with_appended(".txt");
+        let file: StoragePath = StoragePath::unix_root().with_appended("folder");
+        let result: StoragePath = file.with_appended(".txt");
         assert_eq!(result.as_str(), "/folder.txt");
 
-        let folder: FolderPath = FolderPath::unix_root();
-        let result: StoragePath = folder.to_path().with_appended("folder.txt");
-        assert_eq!(result.as_str(), "/folder.txt");
-
-        Ok(())
+        let folder_path: StoragePath = StoragePath::unix_root().with_appended("folder/");
+        let result: StoragePath = folder_path.with_appended("file.txt");
+        assert_eq!(result.as_str(), "/folder/file.txt");
     }
 }
