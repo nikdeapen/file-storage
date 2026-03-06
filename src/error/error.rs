@@ -65,6 +65,9 @@ impl Error {
 
 impl Error {
     //! Common IO Errors
+    //!
+    //! These return `io::Error` instead of `Error` because they are used in contexts where a
+    //! `StoragePath` has not yet been constructed (e.g., during parsing).
 
     /// Creates the `unknown file system` error.
     pub fn unknown_file_system(path: &str) -> io::Error {
@@ -103,8 +106,8 @@ impl Error {
         self.reason
     }
 
-    /// Gets the optional source.
-    pub fn source(&self) -> Option<&io::Error> {
+    /// Gets the optional IO error source.
+    pub fn io_source(&self) -> Option<&io::Error> {
         self.source.as_ref()
     }
 }
@@ -133,16 +136,20 @@ impl Display for Error {
         };
         write!(
             f,
-            "{} error: op={} path={} ",
+            "{} error: op={} path={}",
             file_or_folder, self.operation, self.path
         )?;
-        if let Some(source) = self.source() {
-            write!(f, "source={}", source)?;
+        if let Some(source) = self.io_source() {
+            write!(f, " source={}", source)?;
         } else {
-            write!(f, "reason={}", self.reason)?;
+            write!(f, " reason={}", self.reason)?;
         }
         Ok(())
     }
 }
 
-impl std::error::Error for Error {}
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        self.source.as_ref().map(|e| e as &(dyn std::error::Error + 'static))
+    }
+}

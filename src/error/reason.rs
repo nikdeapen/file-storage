@@ -22,7 +22,6 @@ pub enum Reason {
     InvalidPath,
 
     /// Another uncategorized reason.
-    // todo -- remove this and have Option<Reason> in the error?
     Other,
 }
 
