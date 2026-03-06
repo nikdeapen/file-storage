@@ -21,3 +21,34 @@ impl StoragePath {
         self.clone().to_file()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::StoragePath;
+
+    #[test]
+    fn to_file() {
+        let path: StoragePath = StoragePath::parse("/file.txt").unwrap();
+        assert!(path.to_file().is_ok());
+    }
+
+    #[test]
+    fn to_file_folder_is_err() {
+        let path: StoragePath = StoragePath::parse("/folder/").unwrap();
+        assert!(path.to_file().is_err());
+    }
+
+    #[test]
+    fn to_file_root_is_err() {
+        let path: StoragePath = StoragePath::parse("/").unwrap();
+        assert!(path.to_file().is_err());
+    }
+
+    #[test]
+    fn clone_to_file() {
+        let path: StoragePath = StoragePath::parse("/file.txt").unwrap();
+        let file = path.clone_to_file().unwrap();
+        assert_eq!(file.as_str(), "/file.txt");
+        assert_eq!(path.as_str(), "/file.txt");
+    }
+}
