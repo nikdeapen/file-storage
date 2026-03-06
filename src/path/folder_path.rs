@@ -1,4 +1,4 @@
-use crate::path::StoragePath;
+use crate::StoragePath;
 
 /// A folder path.
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
