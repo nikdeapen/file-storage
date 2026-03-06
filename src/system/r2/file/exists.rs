@@ -6,12 +6,12 @@ use crate::Operation::Exists;
 impl<'a> R2Path<'a> {
     //! Exists
 
-    /// See `FilePath::exist`.
+    /// See `FilePath::exists`.
     pub fn exists(&self) -> Result<bool, Error> {
         RUNTIME.block_on(self.exists_async())
     }
 
-    /// See `FilePath::exist`.
+    /// See `FilePath::exists`.
     pub async fn exists_async(&self) -> Result<bool, Error> {
         use aws_sdk_s3::error::SdkError;
         use std::io;
