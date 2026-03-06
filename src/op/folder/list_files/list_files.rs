@@ -1,7 +1,7 @@
 use crate::op::ListFilesOpInner;
 use crate::system::LocalPath;
 use crate::Operation::ListFiles;
-use crate::Reason::UnsupportedOperation;
+use crate::Reason::UnknownFileSystem;
 use crate::{Error, FolderPath, ListFilesOp};
 
 impl FolderPath {
@@ -27,13 +27,11 @@ impl FolderPath {
         Err(Error::new(
             self.path().clone(),
             ListFiles,
-            UnsupportedOperation,
+            UnknownFileSystem,
         ))
     }
 
     /// Creates a list-files operation on the folder where the files may be unsorted.
-    ///
-    /// The files will be returned in lexicographical order.
     pub fn list_files_unsorted(&self) -> Result<ListFilesOp, Error> {
         if let Some(path) = LocalPath::from(self.path()) {
             return path.list_files_unsorted().map(|op| ListFilesOp {
@@ -51,7 +49,7 @@ impl FolderPath {
         Err(Error::new(
             self.path().clone(),
             ListFiles,
-            UnsupportedOperation,
+            UnknownFileSystem,
         ))
     }
 }
