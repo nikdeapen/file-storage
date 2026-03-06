@@ -5,19 +5,10 @@ impl FilePath {
 
     /// Gets the file extension (the portion after the last `.` in the file name).
     ///
-    /// Returns `None` if there is no `.` in the file name, if the file name starts with `.` and
-    /// has no other `.`, or if the file name ends with `.`.
+    /// Returns `None` if there is no `.` in the file name.
     pub fn extension(&self) -> Option<&str> {
         let name: &str = self.file_name();
-        if let Some(pos) = name.rfind('.') {
-            if pos == 0 || pos == name.len() - 1 {
-                None
-            } else {
-                Some(&name[pos + 1..])
-            }
-        } else {
-            None
-        }
+        name.rfind('.').map(|pos| &name[pos + 1..])
     }
 }
 
@@ -40,13 +31,10 @@ mod tests {
         assert_eq!(file.extension(), None);
 
         let file = root.clone().make_file(".gitignore")?;
-        assert_eq!(file.extension(), None);
+        assert_eq!(file.extension(), Some("gitignore"));
 
         let file = root.clone().make_file("trailing.")?;
-        assert_eq!(file.extension(), None);
-
-        let file = root.clone().make_file(".config.json")?;
-        assert_eq!(file.extension(), Some("json"));
+        assert_eq!(file.extension(), Some(""));
 
         Ok(())
     }
