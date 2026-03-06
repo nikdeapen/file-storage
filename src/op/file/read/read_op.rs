@@ -16,9 +16,6 @@ pub(crate) enum ReadOpInner {
 }
 
 impl Read for ReadOp {
-    //! Read
-
-    /// See `std::io::Read::read`.
     fn read(&mut self, target: &mut [u8]) -> std::io::Result<usize> {
         match &mut self.inner {
             ReadOpInner::Local(op) => op.read(target),

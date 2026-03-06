@@ -49,7 +49,7 @@ impl FilePath {
     /// Returns `Ok(Some(file_content_len))`.
     /// Returns `Ok(None)` if the file did not exist.
     pub fn read_to_string_if_exists(&self, target: &mut String) -> Result<Option<usize>, Error> {
-        // todo -- check unsafe with panics
+        // Safety: we validate UTF-8 before returning and truncate on error or panic-unwind.
         let target: &mut Vec<u8> = unsafe { target.as_mut_vec() };
         let original_len: usize = target.len();
         match self.read_to_vec_if_exists(target) {

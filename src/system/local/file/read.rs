@@ -32,7 +32,6 @@ impl<'a> LocalPath<'a> {
                     .metadata()
                     .map_err(|e| Error::from_source(self.path.clone(), Operation::Read, e))?
                     .len();
-                // todo -- assumes 64 bit machines
                 target.reserve(file_size as usize);
                 let read: usize = file
                     .read_to_end(target)
