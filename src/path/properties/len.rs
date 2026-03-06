@@ -1,7 +1,27 @@
-use crate::StoragePath;
+use crate::{FilePath, FolderPath, StoragePath};
 
 #[allow(clippy::len_without_is_empty)]
 impl StoragePath {
+    //! Length
+
+    /// Gets the path length. (in bytes)
+    pub fn len(&self) -> usize {
+        self.path().len()
+    }
+}
+
+#[allow(clippy::len_without_is_empty)]
+impl FilePath {
+    //! Length
+
+    /// Gets the path length. (in bytes)
+    pub fn len(&self) -> usize {
+        self.path().len()
+    }
+}
+
+#[allow(clippy::len_without_is_empty)]
+impl FolderPath {
     //! Length
 
     /// Gets the path length. (in bytes)
