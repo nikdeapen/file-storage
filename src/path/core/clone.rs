@@ -16,10 +16,9 @@ impl FilePath {
 
     /// Clones the path with the extra capacity.
     pub fn clone_with_extra_capacity(&self, extra_capacity: usize) -> Self {
-        self.path()
-            .clone_with_extra_capacity(extra_capacity)
-            .to_file()
-            .unwrap()
+        let path: StoragePath = self.path().clone_with_extra_capacity(extra_capacity);
+        // Safety: the original path is already a file path.
+        unsafe { Self::new(path) }
     }
 }
 
@@ -28,9 +27,8 @@ impl FolderPath {
 
     /// Clones the path with the extra capacity.
     pub fn clone_with_extra_capacity(&self, extra_capacity: usize) -> Self {
-        self.path()
-            .clone_with_extra_capacity(extra_capacity)
-            .to_folder()
-            .unwrap()
+        let path: StoragePath = self.path().clone_with_extra_capacity(extra_capacity);
+        // Safety: the original path is already a folder path.
+        unsafe { Self::new(path) }
     }
 }

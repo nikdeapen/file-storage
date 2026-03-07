@@ -1,6 +1,6 @@
 [package]
 name = "file-storage"
-version = "0.7.0"
+version = "0.8.0-rc.1"
 description = "This library aids in accessing file-like storage."
 readme = "README.md"
 repository = "https://github.com/nikdeapen/file-storage"
