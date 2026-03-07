@@ -21,9 +21,15 @@ mod tests {
         let folder: FolderPath = folder
             .with_appended(Utc::now().format("%Y%m%d-%H%M%S").to_string())
             .make_folder();
-        let file: FilePath = folder.to_path().with_appended("test.file").to_file()?;
+        let file: FilePath = folder
+            .clone()
+            .to_path()
+            .with_appended("test.file")
+            .to_file()?;
 
         file_util::test_file(&file, false, false)?;
+
+        folder.delete_files()?;
 
         Ok(())
     }
@@ -40,7 +46,7 @@ mod tests {
             .make_folder();
 
         folder_util::list_files(&folder)?;
-        folder_util::delete_files(&folder)?;
+        folder_util::delete_files(&folder, false)?;
 
         Ok(())
     }

@@ -22,7 +22,7 @@ mod tests {
         let folder: FolderPath = FolderPath::temp()?;
 
         folder_util::list_files(&folder)?;
-        folder_util::delete_files(&folder)?;
+        folder_util::delete_files(&folder, true)?;
 
         Ok(())
     }
