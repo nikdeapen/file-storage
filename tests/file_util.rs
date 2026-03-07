@@ -79,7 +79,6 @@ fn read_string(file: &FilePath) -> Result<(), Box<dyn Error>> {
 
     let s: &str = "Hello, World!";
 
-    // assert!(file.read_as_string_if_exists()?.is_none());
     file.write_data(s)?;
     assert_eq!(file.read_as_string_if_exists()?.as_deref(), Some(s));
 
