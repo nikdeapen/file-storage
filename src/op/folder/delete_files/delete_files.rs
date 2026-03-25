@@ -1,5 +1,5 @@
 use crate::system::LocalPath;
-use crate::Operation::Delete;
+use crate::Operation::DeleteFiles;
 use crate::Reason::UnknownFileSystem;
 use crate::{Error, FolderPath};
 
@@ -17,6 +17,6 @@ impl FolderPath {
             return path.delete_files();
         }
 
-        Err(Error::new(self.path().clone(), Delete, UnknownFileSystem))
+        Err(Error::new(self.clone(), DeleteFiles, UnknownFileSystem))
     }
 }

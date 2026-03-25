@@ -11,12 +11,12 @@ impl<'a> R2Path<'a> {
     //! Write
 
     /// See `FilePath::write_if_not_exists`.
-    pub fn write_if_not_exists(&self) -> Result<Option<R2WriteOp>, Error> {
+    pub fn write_if_not_exists(self) -> Result<Option<R2WriteOp>, Error> {
         RUNTIME.block_on(self.write_if_not_exists_async())
     }
 
     /// See `FilePath::write_if_not_exists`.
-    async fn write_if_not_exists_async(&self) -> Result<Option<R2WriteOp>, Error> {
+    async fn write_if_not_exists_async(self) -> Result<Option<R2WriteOp>, Error> {
         if self.exists_async().await? {
             return Ok(None);
         }
@@ -27,7 +27,7 @@ impl<'a> R2Path<'a> {
     }
 
     /// See `FilePath::write_data_if_not_exists`.
-    pub fn write_data_if_not_exists<D>(&self, data: D) -> Result<bool, Error>
+    pub fn write_data_if_not_exists<D>(self, data: D) -> Result<bool, Error>
     where
         D: AsRef<[u8]>,
     {
@@ -36,7 +36,7 @@ impl<'a> R2Path<'a> {
     }
 
     /// See `FilePath::write_data_if_not_exists`.
-    pub async fn write_data_if_not_exists_async<D>(&self, data: D) -> Result<bool, Error>
+    pub async fn write_data_if_not_exists_async<D>(self, data: D) -> Result<bool, Error>
     where
         D: AsRef<[u8]>,
     {

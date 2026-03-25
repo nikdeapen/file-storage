@@ -15,7 +15,7 @@ impl LocalListFilesOp {
     //! Construction
 
     /// Creates a local list-files operation from the `root` folder.
-    pub fn from(root: FolderPath, sorted: bool) -> Result<Self, Error> {
+    pub fn new(root: FolderPath, sorted: bool) -> Result<Self, Error> {
         let entries: Vec<DirEntry> = Self::read_dir(&root, root.path().path(), sorted)?;
         Ok(Self {
             root,
@@ -35,19 +35,8 @@ impl LocalListFilesOp {
     where
         P: AsRef<Path>,
     {
-        fn error<P>(root: &FolderPath, dir: P, e: std::io::Error) -> Error
-        where
-            P: AsRef<Path>,
-        {
-            Error::from_message(
-                root.clone(),
-                ListFiles,
-                format!(
-                    "error reading local directory: dir={:?} error={}",
-                    dir.as_ref(),
-                    e
-                ),
-            )
+        fn error(root: &FolderPath, e: std::io::Error) -> Error {
+            Error::from_source(root.clone(), ListFiles, e)
         }
         match std::fs::read_dir(directory.as_ref()) {
             Ok(read_dir) => {
@@ -55,7 +44,7 @@ impl LocalListFilesOp {
                 for next in read_dir {
                     match next {
                         Ok(entry) => result.push(entry),
-                        Err(e) => return Err(error(root, directory, e)),
+                        Err(e) => return Err(error(root, e)),
                     }
                 }
                 if sorted {
@@ -67,7 +56,7 @@ impl LocalListFilesOp {
                 if e.kind() == NotFound {
                     return Ok(Vec::default());
                 }
-                Err(error(root, directory, e))
+                Err(error(root, e))
             }
         }
     }
@@ -78,7 +67,7 @@ impl LocalListFilesOp {
 
     /// Creates a file path from the `entry`.
     fn file_from_entry(root: &FolderPath, entry: &DirEntry) -> Result<FilePath, Error> {
-        let path_buf = entry.path();
+        let path_buf: std::path::PathBuf = entry.path();
         let path: &str = path_buf.to_str().ok_or_else(|| {
             Error::from_message(root.clone(), ListFiles, "the file path is not UTF-8")
         })?;

@@ -7,12 +7,12 @@ impl<'a> R2Path<'a> {
     //! Exists
 
     /// See `FilePath::exists`.
-    pub fn exists(&self) -> Result<bool, Error> {
+    pub fn exists(self) -> Result<bool, Error> {
         RUNTIME.block_on(self.exists_async())
     }
 
     /// See `FilePath::exists`.
-    pub async fn exists_async(&self) -> Result<bool, Error> {
+    pub async fn exists_async(self) -> Result<bool, Error> {
         use aws_sdk_s3::error::SdkError;
         use std::io;
         use std::io::ErrorKind::Other;

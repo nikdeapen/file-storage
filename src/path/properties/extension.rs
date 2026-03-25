@@ -14,7 +14,8 @@ impl FilePath {
     ///
     /// Returns `None` if there is no `.` in the file name.
     pub fn dot_extension(&self) -> Option<&str> {
-        self.file_name().rfind('.').map(|pos| &self.file_name()[pos..])
+        let file_name: &str = self.file_name();
+        file_name.rfind('.').map(|pos| &file_name[pos..])
     }
 }
 

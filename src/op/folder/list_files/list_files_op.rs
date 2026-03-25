@@ -11,7 +11,7 @@ pub(crate) enum ListFilesOpInner {
     /// A local list-files operation.
     Local(LocalListFilesOp),
 
-    /// A cloudflare r2 list-files operation.
+    /// A cloudflare R2 list-files operation.
     #[cfg(feature = "r2")]
     R2(crate::R2ListFilesOp),
 }

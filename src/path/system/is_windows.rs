@@ -1,7 +1,7 @@
 use crate::StoragePath;
 
 impl StoragePath {
-    //! Is System
+    //! Is Windows
 
     /// Checks if the path is a Windows path.
     pub fn is_windows_path(&self) -> bool {

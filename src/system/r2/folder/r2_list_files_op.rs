@@ -24,7 +24,7 @@ impl R2ListFilesOp {
     /// Creates a new list-files operation.
     pub async fn from_async(root: FolderPath, path: R2Path<'_>) -> Result<Self, Error> {
         let client: Client = R2Path::get_client(path.account_id).await;
-        let paginator = client
+        let paginator: PaginationStream<Result<ListObjectsV2Output, SdkError<ListObjectsV2Error, HttpResponse>>> = client
             .list_objects_v2()
             .bucket(path.bucket)
             .prefix(path.key)

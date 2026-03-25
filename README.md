@@ -4,7 +4,7 @@ This library aids in accessing file-like storage.
 
 ## Features & Dependencies
 
-    file-storage = "0.8.0-rc.1"
+    file-storage = "0.8.0"
 
 ### Primary Features
 

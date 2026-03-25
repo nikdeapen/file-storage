@@ -36,6 +36,6 @@ impl Display for Reason {
             Reason::InvalidPath => "invalid path",
             Reason::Other => "other",
         };
-        write!(f, "{}", s)
+        f.write_str(s)
     }
 }

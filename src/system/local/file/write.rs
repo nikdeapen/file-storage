@@ -6,7 +6,7 @@ impl<'a> LocalPath<'a> {
     //! Write
 
     /// Prepares a write operation.
-    fn prepare(&self) -> Result<(), Error> {
+    fn prepare(self) -> Result<(), Error> {
         if let Some(parent) = std::path::Path::new(self.path).parent() {
             match std::fs::create_dir_all(parent) {
                 Ok(()) => Ok(()),
@@ -22,7 +22,7 @@ impl<'a> LocalPath<'a> {
     }
 
     /// See `FilePath::write_if_not_exists`.
-    pub fn write_if_not_exists(&self) -> Result<Option<LocalWriteOp>, Error> {
+    pub fn write_if_not_exists(self) -> Result<Option<LocalWriteOp>, Error> {
         self.prepare()?;
 
         match std::fs::File::create_new(self.path) {

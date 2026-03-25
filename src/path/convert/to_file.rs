@@ -24,7 +24,7 @@ impl StoragePath {
 
 #[cfg(test)]
 mod tests {
-    use crate::StoragePath;
+    use crate::{FilePath, StoragePath};
 
     #[test]
     fn to_file() {
@@ -47,7 +47,7 @@ mod tests {
     #[test]
     fn clone_to_file() {
         let path: StoragePath = StoragePath::parse("/file.txt").unwrap();
-        let file = path.clone_to_file().unwrap();
+        let file: FilePath = path.clone_to_file().unwrap();
         assert_eq!(file.as_str(), "/file.txt");
         assert_eq!(path.as_str(), "/file.txt");
     }
