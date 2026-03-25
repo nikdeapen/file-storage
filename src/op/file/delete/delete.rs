@@ -10,7 +10,7 @@ impl FilePath {
     /// Returns `Ok(())` if the file was deleted or if the file did not exist.
     pub fn delete(&self) -> Result<(), Error> {
         if let Some(path) = LocalPath::new(self.path()) {
-            return path.delete_if_exists().map(|_| ());
+            return path.delete_if_exists().map(|_existed| ());
         }
 
         #[cfg(feature = "r2")]

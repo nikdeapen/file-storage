@@ -1,7 +1,7 @@
 use crate::StoragePath;
 
 impl StoragePath {
-    //! Is System
+    //! Is Unix
 
     /// Checks if the path is a Unix path.
     pub fn is_unix_path(&self) -> bool {

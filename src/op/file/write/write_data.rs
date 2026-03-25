@@ -1,5 +1,6 @@
+use crate::system::LocalPath;
 use crate::Operation;
-use crate::Reason::FileAlreadyExists;
+use crate::Reason::{FileAlreadyExists, UnknownFileSystem};
 use crate::{Error, FilePath};
 use std::io::Write;
 
@@ -33,21 +34,29 @@ impl FilePath {
     where
         D: AsRef<[u8]>,
     {
+        if let Some(path) = LocalPath::new(self.path()) {
+            return if let Some(mut write) = path.write_if_not_exists()? {
+                write
+                    .write_all(data.as_ref())
+                    .map_err(|e| Error::from_source(self.clone(), Operation::Write, e))?;
+                write
+                    .close()
+                    .map_err(|e| Error::from_source(self.clone(), Operation::Write, e))?;
+                Ok(true)
+            } else {
+                Ok(false)
+            };
+        }
+
         #[cfg(feature = "r2")]
         if let Some(path) = crate::R2Path::new(self.path()) {
             return path.write_data_if_not_exists(data);
         }
 
-        if let Some(mut write) = self.write_if_not_exists()? {
-            write
-                .write_all(data.as_ref())
-                .map_err(|e| Error::from_source(self.path().clone(), Operation::Write, e))?;
-            write
-                .close()
-                .map_err(|e| Error::from_source(self.path().clone(), Operation::Write, e))?;
-            Ok(true)
-        } else {
-            Ok(false)
-        }
+        Err(Error::new(
+            self.clone(),
+            Operation::Write,
+            UnknownFileSystem,
+        ))
     }
 }

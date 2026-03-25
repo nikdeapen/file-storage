@@ -16,17 +16,17 @@ impl FilePath {
 
 #[cfg(test)]
 mod tests {
-    use crate::StoragePath;
+    use crate::{FilePath, StoragePath};
 
     #[test]
     fn file_name() {
-        let file = StoragePath::parse("/file.txt").unwrap().to_file().unwrap();
+        let file: FilePath = StoragePath::parse("/file.txt").unwrap().to_file().unwrap();
         assert_eq!(file.file_name(), "file.txt");
 
-        let file = StoragePath::parse("/foo/bar/data.json").unwrap().to_file().unwrap();
+        let file: FilePath = StoragePath::parse("/foo/bar/data.json").unwrap().to_file().unwrap();
         assert_eq!(file.file_name(), "data.json");
 
-        let file = StoragePath::parse("/solo").unwrap().to_file().unwrap();
+        let file: FilePath = StoragePath::parse("/solo").unwrap().to_file().unwrap();
         assert_eq!(file.file_name(), "solo");
     }
 }

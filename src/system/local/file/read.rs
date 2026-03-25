@@ -7,7 +7,7 @@ impl<'a> LocalPath<'a> {
     //! Read
 
     /// See `FilePath::read_if_exists`.
-    pub fn read_if_exists(&self) -> Result<Option<LocalReadOp>, Error> {
+    pub fn read_if_exists(self) -> Result<Option<LocalReadOp>, Error> {
         match std::fs::File::open(self.path.as_str()) {
             Ok(file) => Ok(Some(LocalReadOp { file })),
             Err(error) => {
@@ -25,14 +25,14 @@ impl<'a> LocalPath<'a> {
     }
 
     /// See `FilePath::read_to_vec_if_exists`.
-    pub fn read_to_vec_if_exists(&self, target: &mut Vec<u8>) -> Result<Option<usize>, Error> {
+    pub fn read_to_vec_if_exists(self, target: &mut Vec<u8>) -> Result<Option<usize>, Error> {
         match std::fs::File::open(self.path.as_str()) {
             Ok(mut file) => {
                 let file_size: u64 = file
                     .metadata()
                     .map_err(|e| Error::from_source(self.path.clone(), Operation::Read, e))?
                     .len();
-                target.reserve(file_size as usize);
+                target.reserve(file_size as usize); // todo: truncates on 32-bit for files > 4GB
                 let read: usize = file
                     .read_to_end(target)
                     .map_err(|e| Error::from_source(self.path.clone(), Operation::Read, e))?;

@@ -25,7 +25,7 @@ impl FolderPath {
         }
 
         Err(Error::new(
-            self.path().clone(),
+            self.clone(),
             ListFiles,
             UnknownFileSystem,
         ))
@@ -47,7 +47,7 @@ impl FolderPath {
         }
 
         Err(Error::new(
-            self.path().clone(),
+            self.clone(),
             ListFiles,
             UnknownFileSystem,
         ))

@@ -10,7 +10,7 @@ pub(crate) enum ReadOpInner {
     /// A local read operation.
     Local(crate::LocalReadOp),
 
-    /// A cloudflare r2 read operation.
+    /// A cloudflare R2 read operation.
     #[cfg(feature = "r2")]
     R2(crate::R2ReadOp),
 }

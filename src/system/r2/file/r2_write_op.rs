@@ -63,7 +63,7 @@ impl R2WriteOp {
 
     async fn upload_part_async(&mut self, data: Vec<u8>) -> Result<(), io::Error> {
         let body: ByteStream = ByteStream::from(Bytes::from(data));
-        let output = R2Path::get_client(&self.account_id)
+        let output: aws_sdk_s3::operation::upload_part::UploadPartOutput = R2Path::get_client(&self.account_id)
             .await
             .upload_part()
             .bucket(&self.bucket)

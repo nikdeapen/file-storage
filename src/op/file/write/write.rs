@@ -15,7 +15,7 @@ impl FilePath {
             Ok(write)
         } else {
             Err(Error::new(
-                self.path().clone(),
+                self.clone(),
                 Write,
                 Reason::FileAlreadyExists,
             ))
@@ -44,7 +44,7 @@ impl FilePath {
         }
 
         Err(Error::new(
-            self.path().clone(),
+            self.clone(),
             Write,
             Reason::UnknownFileSystem,
         ))

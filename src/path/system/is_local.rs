@@ -1,7 +1,7 @@
 use crate::StoragePath;
 
 impl StoragePath {
-    //! Is System
+    //! Is Local
 
     /// Checks if the path is a local path.
     pub fn is_local_path(&self) -> bool {

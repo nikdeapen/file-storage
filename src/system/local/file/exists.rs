@@ -7,7 +7,7 @@ impl<'a> LocalPath<'a> {
     //! Exists
 
     /// See `FilePath::exists`.
-    pub fn exists(&self) -> Result<bool, Error> {
+    pub fn exists(self) -> Result<bool, Error> {
         match std::fs::metadata(self.path) {
             Ok(metadata) => {
                 if metadata.is_file() {

@@ -7,14 +7,14 @@ impl<'a> R2Path<'a> {
     //! Delete Files
 
     /// Deletes all files with the current key prefix.
-    pub fn delete_files(&self) -> Result<(), Error> {
+    pub fn delete_files(self) -> Result<(), Error> {
         RUNTIME.block_on(self.delete_files_async())
     }
 
     /// Deletes all files with the current key prefix.
-    pub async fn delete_files_async(&self) -> Result<(), Error> {
-        let client = Self::get_client(self.account_id).await;
-        let mut paginator = client
+    pub async fn delete_files_async(self) -> Result<(), Error> {
+        let client: aws_sdk_s3::Client = Self::get_client(self.account_id).await;
+        let mut paginator: aws_smithy_async::future::pagination_stream::PaginationStream<_> = client
             .list_objects_v2()
             .bucket(self.bucket)
             .prefix(self.key)
@@ -24,7 +24,7 @@ impl<'a> R2Path<'a> {
         while let Some(page) = paginator
             .try_next()
             .await
-            .map_err(|e| Error::from_source(self.path.clone(), crate::Operation::Delete, std::io::Error::other(e)))?
+            .map_err(|e| Error::from_source(self.path.clone(), crate::Operation::DeleteFiles, std::io::Error::other(e)))?
         {
             let objects: Vec<ObjectIdentifier> = page
                 .contents
@@ -48,7 +48,7 @@ impl<'a> R2Path<'a> {
                 .set_objects(Some(objects))
                 .build()
                 .map_err(|e| {
-                    Error::from_source(self.path.clone(), crate::Operation::Delete, std::io::Error::other(e))
+                    Error::from_source(self.path.clone(), crate::Operation::DeleteFiles, std::io::Error::other(e))
                 })?;
 
             client
@@ -58,7 +58,7 @@ impl<'a> R2Path<'a> {
                 .send()
                 .await
                 .map_err(|e| {
-                    Error::from_source(self.path.clone(), crate::Operation::Delete, std::io::Error::other(e))
+                    Error::from_source(self.path.clone(), crate::Operation::DeleteFiles, std::io::Error::other(e))
                 })?;
         }
 

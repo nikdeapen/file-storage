@@ -36,6 +36,6 @@ impl Display for Operation {
             Operation::DeleteFiles => "delete-files",
             Operation::ModifyPath => "modify-path",
         };
-        write!(f, "{}", s)
+        f.write_str(s)
     }
 }

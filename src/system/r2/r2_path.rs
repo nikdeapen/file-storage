@@ -2,16 +2,15 @@ use crate::StoragePath;
 use aws_config::{BehaviorVersion, Region};
 use aws_sdk_s3::{Client, Config};
 use dashmap::DashMap;
-use once_cell::sync::Lazy;
 use std::sync::LazyLock;
 use tokio::runtime::{Builder, Runtime};
 
 /// The global Cloudflare R2 `Client` map. `(account_id -> client)`.
-static R2_CLIENTS: Lazy<DashMap<String, Client>> = Lazy::new(DashMap::new);
+static R2_CLIENTS: LazyLock<DashMap<String, Client>> = LazyLock::new(DashMap::new);
 
 /// The runtime.
 pub(in crate::system::r2) static RUNTIME: LazyLock<Runtime> =
-    LazyLock::new(|| Builder::new_multi_thread().enable_all().build().unwrap());
+    LazyLock::new(|| Builder::new_multi_thread().enable_all().build().expect("failed to build tokio runtime"));
 
 /// A Cloudflare R2 path.
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
@@ -93,7 +92,7 @@ impl<'a> R2Path<'a> {
     //! Path
 
     /// Gets the full path with the given object `key`.
-    pub fn path_with_object_key(&self, key: &str) -> String {
+    pub fn path_with_object_key(self, key: &str) -> String {
         format!(
             "{}{}{}{}/{}",
             Self::HTTPS_PREFIX,
@@ -111,12 +110,13 @@ impl<'a> R2Path<'a> {
     /// Gets the client for the `account_id`.
     pub(crate) async fn get_client(account_id: &str) -> Client {
         if let Some(client) = R2_CLIENTS.get(account_id) {
-            client.value().clone()
-        } else {
-            let client: Client = Self::create_client(account_id).await;
-            R2_CLIENTS.insert(account_id.to_string(), client.clone());
-            client
+            return client.value().clone();
         }
+        let client: Client = Self::create_client(account_id).await;
+        R2_CLIENTS
+            .entry(account_id.to_string())
+            .or_insert(client)
+            .clone()
     }
 
     /// Creates a client for the `account_id`.

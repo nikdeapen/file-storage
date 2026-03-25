@@ -8,7 +8,7 @@ use aws_sdk_s3::operation::get_object::{GetObjectError, GetObjectOutput};
 impl<'a> R2Path<'a> {
     //! Read
 
-    async fn get_object_output(&self) -> Result<Option<GetObjectOutput>, Error> {
+    async fn get_object_output(self) -> Result<Option<GetObjectOutput>, Error> {
         let result: Result<GetObjectOutput, SdkError<GetObjectError>> =
             Self::get_client(self.account_id)
                 .await
@@ -34,7 +34,7 @@ impl<'a> R2Path<'a> {
     }
 
     /// See `FilePath::read_if_exists`.
-    async fn read_if_exists_async(&self) -> Result<Option<R2ReadOp>, Error> {
+    async fn read_if_exists_async(self) -> Result<Option<R2ReadOp>, Error> {
         if let Some(object) = self.get_object_output().await? {
             Ok(Some(R2ReadOp::from(object)))
         } else {
@@ -43,40 +43,36 @@ impl<'a> R2Path<'a> {
     }
 
     /// See `FilePath::read_if_exists`.
-    pub fn read_if_exists(&self) -> Result<Option<R2ReadOp>, Error> {
+    pub fn read_if_exists(self) -> Result<Option<R2ReadOp>, Error> {
         RUNTIME.block_on(self.read_if_exists_async())
     }
 
     /// See `FilePath::read_to_vec_if_exists`.
-    pub fn read_to_vec_if_exists(&self, target: &mut Vec<u8>) -> Result<Option<usize>, Error> {
+    pub fn read_to_vec_if_exists(self, target: &mut Vec<u8>) -> Result<Option<usize>, Error> {
         RUNTIME.block_on(self.read_to_vec_if_exists_async(target))
     }
 
     /// See `FilePath::read_to_vec_if_exists`.
     pub async fn read_to_vec_if_exists_async(
-        &self,
+        self,
         target: &mut Vec<u8>,
     ) -> Result<Option<usize>, Error> {
         if let Some(object) = self.get_object_output().await? {
-            let mut read: R2ReadOp = R2ReadOp::from(object);
-            let min_size: u64 = read.content.size_hint().0;
+            let mut body: aws_sdk_s3::primitives::ByteStream = object.body;
+            let min_size: u64 = body.size_hint().0;
             if min_size > 0 && min_size <= usize::MAX as u64 {
                 target.reserve(min_size as usize);
             }
             let mut total: usize = 0;
-            loop {
-                let mut buffer: [u8; 4096] = [0; 4096];
-                let read: usize = read
-                    .read_async(&mut buffer)
-                    .await
-                    .map_err(|error| Error::from_source(self.path.clone(), Read, error))?;
-                if read == 0 {
-                    return Ok(Some(total));
-                } else {
-                    target.extend_from_slice(&buffer[..read]);
-                }
-                total += read;
+            while let Some(chunk) = body
+                .try_next()
+                .await
+                .map_err(|error| Error::from_source(self.path.clone(), Read, error))?
+            {
+                target.extend_from_slice(&chunk);
+                total += chunk.len();
             }
+            Ok(Some(total))
         } else {
             Ok(None)
         }
