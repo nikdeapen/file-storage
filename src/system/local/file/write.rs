@@ -40,4 +40,11 @@ impl<'a> LocalPath<'a> {
             }
         }
     }
+
+    /// Writes the `data` to the file, overwriting it if it already exists.
+    pub fn overwrite(self, data: &[u8]) -> Result<(), Error> {
+        self.prepare()?;
+        std::fs::write(self.path, data)
+            .map_err(|e| Error::from_source(self.path.clone(), Operation::Write, e))
+    }
 }
