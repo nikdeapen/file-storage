@@ -4,12 +4,16 @@ This library aids in accessing file-like storage.
 
 ## Features & Dependencies
 
-    file-storage = "0.8.0"
+```text
+file-storage = "0.9.0"
+```
 
 ### Primary Features
 
-    tempfile    # enables temporary local path creation
-    r2          # enables cloudflare r2 storage via the aws sdk (uses tokio)
+```text
+tempfile    # enables temporary local path creation
+r2          # enables cloudflare r2 storage via the aws sdk (uses tokio)
+```
 
 ### Dependencies
 

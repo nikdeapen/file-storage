@@ -9,6 +9,8 @@ impl FilePath {
 
     /// Opens a write operation to the file.
     ///
+    /// The returned operation must be closed with `WriteOp::close` to commit the write.
+    ///
     /// Returns `Err(FileAlreadyExists)` if the file already exists.
     pub fn write(&self) -> Result<WriteOp, Error> {
         if let Some(write) = self.write_if_not_exists()? {
@@ -23,6 +25,8 @@ impl FilePath {
     }
 
     /// Opens a write operation to create a new file.
+    ///
+    /// The returned operation must be closed with `WriteOp::close` to commit the write.
     ///
     /// Returns `Ok(None)` if the file already exists.
     pub fn write_if_not_exists(&self) -> Result<Option<WriteOp>, Error> {

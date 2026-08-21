@@ -4,6 +4,7 @@
 /// Storage paths are divided into a base path and a relative path. The base path is effectively
 /// immutable, and the relative path is a sequence of segments divided by file-separators.
 ///
+/// ```text
 /// Unix Example:
 /// Path:           /the/path
 /// Base Path:      /
@@ -18,6 +19,7 @@
 /// Path:           https://example.com/the/path
 /// Base Path:      https://example.com/
 /// Relative Path:  the/path
+/// ```
 ///
 /// # Files & Folders
 /// A storage path can be a file path or a folder path. These are mutually exclusive and

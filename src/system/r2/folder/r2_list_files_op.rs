@@ -14,6 +14,7 @@ pub struct R2ListFilesOp {
     root: FolderPath,
     base_url: String,
     files: Vec<FilePath>,
+    finished: bool,
     paginator:
         PaginationStream<Result<ListObjectsV2Output, SdkError<ListObjectsV2Error, HttpResponse>>>,
 }
@@ -24,7 +25,9 @@ impl R2ListFilesOp {
     /// Creates a new list-files operation.
     pub async fn from_async(root: FolderPath, path: R2Path<'_>) -> Result<Self, Error> {
         let client: Client = R2Path::get_client(path.account_id).await;
-        let paginator: PaginationStream<Result<ListObjectsV2Output, SdkError<ListObjectsV2Error, HttpResponse>>> = client
+        let paginator: PaginationStream<
+            Result<ListObjectsV2Output, SdkError<ListObjectsV2Error, HttpResponse>>,
+        > = client
             .list_objects_v2()
             .bucket(path.bucket)
             .prefix(path.key)
@@ -41,6 +44,7 @@ impl R2ListFilesOp {
             root,
             base_url,
             files: Vec::default(),
+            finished: false,
             paginator,
         })
     }
@@ -111,10 +115,20 @@ impl Iterator for R2ListFilesOp {
             if let Some(file) = self.files.pop() {
                 return Some(Ok(file));
             }
+            if self.finished {
+                return None;
+            }
             match self.fetch_next_page() {
                 Ok(true) => continue,
-                Ok(false) => return None,
-                Err(error) => return Some(Err(error)),
+                Ok(false) => {
+                    self.finished = true;
+                    return None;
+                }
+                Err(error) => {
+                    self.finished = true;
+                    self.files.clear();
+                    return Some(Err(error));
+                }
             }
         }
     }

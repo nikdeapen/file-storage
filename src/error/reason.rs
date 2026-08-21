@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter};
 
 /// The reason for a path operation error.
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
+#[non_exhaustive]
 pub enum Reason {
     /// The file system could not be resolved for the path.
     UnknownFileSystem,
