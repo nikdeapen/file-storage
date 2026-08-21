@@ -2,6 +2,12 @@ use crate::system::LocalWriteOp;
 use std::io::Write;
 
 /// A write operation.
+///
+/// # Close
+/// The write is only guaranteed to be committed by `close`. `flush` is not a durability point:
+/// backends that upload in parts, such as Cloudflare R2, cannot commit a trailing partial part
+/// before the operation is closed. Dropping the operation without calling `close` discards the
+/// write on those backends.
 pub struct WriteOp {
     pub(crate) inner: WriteOpInner,
 }
@@ -25,6 +31,9 @@ impl Write for WriteOp {
         }
     }
 
+    /// Flushes what the backend is able to commit before the operation is closed.
+    ///
+    /// See the `Close` section on `WriteOp`: this is not a durability point.
     fn flush(&mut self) -> std::io::Result<()> {
         match &mut self.inner {
             WriteOpInner::Local(op) => op.flush(),
@@ -38,6 +47,9 @@ impl WriteOp {
     //! Close
 
     /// Ensures the file has been completely written and closes the file.
+    ///
+    /// This must be called. Dropping the operation instead discards the write on backends that
+    /// upload in parts, such as Cloudflare R2.
     pub fn close(self) -> Result<(), std::io::Error> {
         match self.inner {
             WriteOpInner::Local(op) => op.close(),

@@ -11,6 +11,12 @@ const MIN_PART_SIZE: usize = 5 * 1024 * 1024;
 /// An R2 write operation.
 ///
 /// Streams data to R2 via multipart upload.
+///
+/// # Close
+/// The object is only created by `close`. Multipart uploads reject non-final parts smaller than
+/// `MIN_PART_SIZE`, so buffered data below that threshold cannot be committed before then and
+/// `flush` is not a durability point. Dropping the operation without calling `close` aborts the
+/// upload and the object is never created.
 pub struct R2WriteOp {
     account_id: String,
     bucket: String,
@@ -86,26 +92,44 @@ impl R2WriteOp {
     }
 }
 
-impl io::Write for R2WriteOp {
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.buffer.extend_from_slice(buf);
+impl R2WriteOp {
+    //! Upload Full Parts
+
+    /// Uploads every buffered part that has reached `MIN_PART_SIZE`.
+    ///
+    /// The remainder stays buffered for `close` to upload as the final part.
+    fn upload_full_parts(&mut self) -> io::Result<()> {
         while self.buffer.len() >= MIN_PART_SIZE {
             let remainder: Vec<u8> = self.buffer.split_off(MIN_PART_SIZE);
             let part_data: Vec<u8> = std::mem::replace(&mut self.buffer, remainder);
             RUNTIME.block_on(self.upload_part_async(part_data))?;
         }
+        Ok(())
+    }
+}
+
+impl io::Write for R2WriteOp {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.buffer.extend_from_slice(buf);
+        self.upload_full_parts()?;
         Ok(buf.len())
     }
 
+    /// Uploads every part that has reached `MIN_PART_SIZE`.
+    ///
+    /// This is not a durability point: multipart uploads reject non-final parts smaller than
+    /// `MIN_PART_SIZE`, so the trailing remainder can only be committed by `close`.
     fn flush(&mut self) -> io::Result<()> {
-        Ok(())
+        self.upload_full_parts()
     }
 }
 
 impl R2WriteOp {
     //! Close
 
-    /// Completes the multipart upload to R2.
+    /// Completes the multipart upload to R2, creating the object.
+    ///
+    /// This must be called. Dropping the operation instead aborts the upload.
     pub fn close(mut self) -> Result<(), io::Error> {
         let result: Result<(), io::Error> = RUNTIME.block_on(self.close_async());
         if result.is_ok() {
@@ -143,6 +167,7 @@ impl R2WriteOp {
 }
 
 impl Drop for R2WriteOp {
+    /// Aborts the multipart upload unless it was completed by `close`.
     fn drop(&mut self) {
         if !self.completed {
             let account_id: String = std::mem::take(&mut self.account_id);

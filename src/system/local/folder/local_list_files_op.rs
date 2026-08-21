@@ -30,7 +30,9 @@ impl LocalListFilesOp {
 
     /// Reads the entries in the `directory`.
     ///
-    /// If `sorted` the entries will be returned in reverse sorted order.
+    /// If `sorted` the entries will be returned in reverse lexicographical order of their full
+    /// paths, so popping from the end emits files in order. Directory names are compared with a
+    /// trailing file-separator since that is how they appear in the full paths beneath them.
     fn read_dir<P>(root: &FolderPath, directory: P, sorted: bool) -> Result<Vec<DirEntry>, Error>
     where
         P: AsRef<Path>,
@@ -48,7 +50,15 @@ impl LocalListFilesOp {
                     }
                 }
                 if sorted {
-                    result.sort_by_key(|b| std::cmp::Reverse(b.file_name()))
+                    let separator: char = root.file_separator();
+                    result.sort_by_cached_key(|entry| {
+                        let mut key: Vec<u8> = entry.file_name().as_encoded_bytes().to_vec();
+                        if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
+                            let mut buffer: [u8; 4] = [0u8; 4];
+                            key.extend_from_slice(separator.encode_utf8(&mut buffer).as_bytes());
+                        }
+                        std::cmp::Reverse(key)
+                    })
                 }
                 Ok(result)
             }

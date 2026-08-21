@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter};
 
 /// A path operation.
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
+#[non_exhaustive]
 pub enum Operation {
     /// Check if a file exists.
     Exists,
