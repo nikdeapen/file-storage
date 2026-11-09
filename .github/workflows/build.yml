@@ -7,12 +7,18 @@ env:
   CARGO_TERM_COLOR: always
 jobs:
   build:
-    name: Build (${{ matrix.features || 'no features' }})
+    name: Build (${{ matrix.name }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        features: [ "", "--features r2", "--all-features" ]
+        include:
+          - name: no features
+            features: ""
+          - name: r2
+            features: "--features r2"
+          - name: all features
+            features: "--all-features"
     steps:
       - name: Git Checkout
         uses: actions/checkout@v4

@@ -2,6 +2,7 @@
   <dictionary name="project">
     <words>
       <w>cloudflare</w>
+      <w>rustfmt</w>
       <w>tempfile</w>
     </words>
   </dictionary>
