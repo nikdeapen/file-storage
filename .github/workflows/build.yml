@@ -1,16 +1,18 @@
 on:
+  push:
+    branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
 env:
   CARGO_TERM_COLOR: always
 jobs:
   build:
-    name: Build # todo -- feature matrix
+    name: Build (${{ matrix.features || 'no features' }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        feature: [ tempfile, r2 ]
+        features: [ "", "--features r2", "--all-features" ]
     steps:
       - name: Git Checkout
         uses: actions/checkout@v4
@@ -19,11 +21,11 @@ jobs:
         with:
           toolchain: stable
           components: rustfmt, clippy
+      - name: Format
+        run: cargo fmt --check
       - name: Build
-        run: cargo build --no-default-features --features ${{ matrix.feature }} --verbose
+        run: cargo build --no-default-features ${{ matrix.features }} --verbose
       - name: Test
-        run: cargo test --no-default-features --features ${{ matrix.feature }} --verbose
+        run: cargo test --no-default-features ${{ matrix.features }} --verbose
       - name: Lint
-        run: cargo clippy --no-default-features --features ${{ matrix.feature }} --all-targets -- -D warnings
-      - name: Lint
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --no-default-features ${{ matrix.features }} --all-targets -- -D warnings

@@ -2,8 +2,8 @@ use std::fs::File;
 use std::io::Read;
 
 /// A local read operation.
-pub struct LocalReadOp {
-    pub(crate) file: File,
+pub(crate) struct LocalReadOp {
+    pub(in crate::system::local) file: File,
 }
 
 impl Read for LocalReadOp {

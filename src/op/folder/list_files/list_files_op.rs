@@ -1,19 +1,21 @@
-use crate::system::LocalListFilesOp;
+use crate::LocalListFilesOp;
+#[cfg(feature = "r2")]
+use crate::R2ListFilesOp;
 use crate::{Error, FilePath};
 
 /// A list-files operation.
 pub struct ListFilesOp {
-    pub(crate) inner: ListFilesOpInner,
+    pub(in crate::op) inner: ListFilesOpInner,
 }
 
 /// A file-system-specific list-files operation.
-pub(crate) enum ListFilesOpInner {
+pub(in crate::op) enum ListFilesOpInner {
     /// A local list-files operation.
     Local(LocalListFilesOp),
 
-    /// A cloudflare R2 list-files operation.
+    /// A Cloudflare R2 list-files operation.
     #[cfg(feature = "r2")]
-    R2(crate::R2ListFilesOp),
+    R2(R2ListFilesOp),
 }
 
 impl Iterator for ListFilesOp {

@@ -6,13 +6,8 @@ use crate::Error;
 impl<'a> R2Path<'a> {
     //! List Files
 
-    /// Lists the files in the folder.
-    pub fn list_files(self) -> Result<R2ListFilesOp, Error> {
-        RUNTIME.block_on(self.list_files_async())
-    }
-
-    /// Lists the files in the folder.
-    pub async fn list_files_async(self) -> Result<R2ListFilesOp, Error> {
-        R2ListFilesOp::from_async(self.path.clone().to_folder()?, self).await
+    /// See `FolderPath::list_files`.
+    pub(crate) fn list_files(self) -> Result<R2ListFilesOp, Error> {
+        RUNTIME.block_on(R2ListFilesOp::from_async(self))
     }
 }

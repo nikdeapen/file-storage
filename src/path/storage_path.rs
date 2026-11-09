@@ -1,8 +1,8 @@
 /// A file or folder path.
 ///
-/// # Base Path & Relative Path
+/// # Base Path and Relative Path
 /// Storage paths are divided into a base path and a relative path. The base path is effectively
-/// immutable, and the relative path is a sequence of segments divided by file-separators.
+/// immutable. The relative path is a sequence of segments divided by file separators.
 ///
 /// ```text
 /// Unix Example:
@@ -15,16 +15,28 @@
 /// Base Path:      C:\
 /// Relative Path:  The\Path
 ///
-/// URL Example:
-/// Path:           https://example.com/the/path
-/// Base Path:      https://example.com/
+/// Cloudflare R2 Example:
+/// Path:           https://account.r2.cloudflarestorage.com/bucket/the/path
+/// Base Path:      https://account.r2.cloudflarestorage.com/bucket/
 /// Relative Path:  the/path
 /// ```
 ///
-/// # Files & Folders
+/// # Files and Folders
 /// A storage path can be a file path or a folder path. These are mutually exclusive and
 /// exhaustive. A storage path is a folder path if it is equal to its base path or ends with a
-/// file-separator, otherwise it is a file path. This invariant can be broken with `unsafe`.
+/// file separator. Otherwise it is a file path. This invariant can be broken with `unsafe`.
+///
+/// # File Separators
+/// - Windows paths use `\`. Unix and R2 paths use `/`.
+/// - A Windows path never holds `/`. Parsing and appending turn each `/` into `\`. A path built
+///   by appending then equals the same path parsed in one piece.
+/// - Unix and R2 paths keep `\` as is. It is a valid character in their names.
+/// - Like the file and folder rule, this can be broken with `unsafe`.
+///
+/// # Comparison
+/// - Paths compare by their exact text.
+/// - Letter case matters on Windows too. `C:\Foo` and `C:\foo` are not equal.
+#[must_use]
 #[derive(Clone, Debug)]
 pub struct StoragePath {
     path: String,
@@ -35,10 +47,12 @@ pub struct StoragePath {
 impl StoragePath {
     //! Construction
 
-    /// Creates a new storage path.
+    /// Creates the [StoragePath].
     ///
     /// # Safety
-    /// The `base_len` must be a valid char boundary in the `path`.
+    /// - The `base_len` must be on a char boundary in the `path`.
+    /// - The `base_len` must cover the whole base path.
+    /// - A Windows path must hold no `/`.
     pub unsafe fn new<S>(path: S, base_len: usize, file_separator: char) -> Self
     where
         S: Into<String>,
@@ -66,7 +80,8 @@ impl StoragePath {
     /// Gets the mutable path string.
     ///
     /// # Safety
-    /// The path string must remain valid for the path.
+    /// - The first `base_len` bytes must not change.
+    /// - A Windows path must not gain a `/`.
     pub unsafe fn path_mut(&mut self) -> &mut String {
         &mut self.path
     }
@@ -76,7 +91,7 @@ impl StoragePath {
         self.base_len
     }
 
-    /// Gets the file-separator.
+    /// Gets the file separator.
     pub fn file_separator(&self) -> char {
         self.file_separator
     }

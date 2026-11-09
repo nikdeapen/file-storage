@@ -5,12 +5,12 @@ impl<'a> LocalPath<'a> {
     //! List Files
 
     /// See `FolderPath::list_files`.
-    pub fn list_files(self) -> Result<LocalListFilesOp, Error> {
-        LocalListFilesOp::new(self.path.clone().make_folder(), true)
+    pub(crate) fn list_files(self) -> Result<LocalListFilesOp, Error> {
+        LocalListFilesOp::new(self.path.clone_make_folder(), true)
     }
 
     /// See `FolderPath::list_files_unsorted`.
-    pub fn list_files_unsorted(self) -> Result<LocalListFilesOp, Error> {
-        LocalListFilesOp::new(self.path.clone().make_folder(), false)
+    pub(crate) fn list_files_unsorted(self) -> Result<LocalListFilesOp, Error> {
+        LocalListFilesOp::new(self.path.clone_make_folder(), false)
     }
 }

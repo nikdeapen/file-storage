@@ -1,29 +1,46 @@
-use crate::system::LocalWriteOp;
-use std::io::Write;
+use crate::Operation;
+#[cfg(feature = "r2")]
+use crate::R2WriteOp;
+use crate::Reason::FileAlreadyExists;
+use crate::{Error, FilePath, LocalWriteOp};
+use std::io;
 
 /// A write operation.
 ///
 /// # Close
-/// The write is only guaranteed to be committed by `close`. `flush` is not a durability point:
-/// backends that upload in parts, such as Cloudflare R2, cannot commit a trailing partial part
-/// before the operation is closed. Dropping the operation without calling `close` discards the
-/// write on those backends.
+/// - The file only appears when `close` succeeds. `flush` is not a durability point.
+/// - Dropping the operation without calling `close` discards the write.
+///
+/// # Local File Systems
+/// - The data goes to a hidden temp file in the same folder until `close`. Listing the folder
+///   shows it.
+/// - A crash can leave the temp file behind. It is named `.file-storage-{pid}-{n}.tmp`.
+/// - Creating a file needs hard links. File systems without them, such as FAT, fail at `close`.
+/// - On Unix `close` syncs the file's folders after moving it into place. If that fails, the file
+///   is in place but `close` still returns the error.
+///
+/// # Cloudflare R2
+/// - `write` may take only part of the buffer. Use `write_all` to write everything.
+/// - An object can hold at most about 48.8 GiB.
 pub struct WriteOp {
-    pub(crate) inner: WriteOpInner,
+    /// The file being written.
+    pub(in crate::op) file: FilePath,
+
+    pub(in crate::op) inner: WriteOpInner,
 }
 
 /// A file-system-specific write operation.
-pub(crate) enum WriteOpInner {
+pub(in crate::op) enum WriteOpInner {
     /// A local write operation.
     Local(LocalWriteOp),
 
-    /// A cloudflare R2 write operation.
+    /// A Cloudflare R2 write operation.
     #[cfg(feature = "r2")]
-    R2(crate::R2WriteOp),
+    R2(R2WriteOp),
 }
 
-impl Write for WriteOp {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+impl io::Write for WriteOp {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         match &mut self.inner {
             WriteOpInner::Local(op) => op.write(buf),
             #[cfg(feature = "r2")]
@@ -33,8 +50,9 @@ impl Write for WriteOp {
 
     /// Flushes what the backend is able to commit before the operation is closed.
     ///
-    /// See the `Close` section on `WriteOp`: this is not a durability point.
-    fn flush(&mut self) -> std::io::Result<()> {
+    /// # Note
+    /// - This is not a durability point. See the `Close` section on `WriteOp`.
+    fn flush(&mut self) -> io::Result<()> {
         match &mut self.inner {
             WriteOpInner::Local(op) => op.flush(),
             #[cfg(feature = "r2")]
@@ -48,13 +66,22 @@ impl WriteOp {
 
     /// Ensures the file has been completely written and closes the file.
     ///
-    /// This must be called. Dropping the operation instead discards the write on backends that
-    /// upload in parts, such as Cloudflare R2.
-    pub fn close(self) -> Result<(), std::io::Error> {
-        match self.inner {
+    /// # Note
+    /// - This must be called. Dropping the operation instead discards the write.
+    /// - A create-only write fails here with `FileAlreadyExists` if another writer created the
+    ///   file first.
+    pub fn close(self) -> Result<(), Error> {
+        let result: io::Result<()> = match self.inner {
             WriteOpInner::Local(op) => op.close(),
             #[cfg(feature = "r2")]
             WriteOpInner::R2(op) => op.close(),
-        }
+        };
+        result.map_err(|error| {
+            if error.kind() == io::ErrorKind::AlreadyExists {
+                Error::new(self.file, Operation::Write, FileAlreadyExists)
+            } else {
+                Error::from_source(self.file, Operation::Write, error)
+            }
+        })
     }
 }

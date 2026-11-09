@@ -1,4 +1,4 @@
-use crate::path::StoragePath;
+use crate::StoragePath;
 use std::cmp::Ordering;
 use std::hash::{Hash, Hasher};
 

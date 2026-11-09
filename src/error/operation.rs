@@ -1,29 +1,30 @@
 use std::fmt::{Display, Formatter};
 
 /// A path operation.
-#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
+#[must_use]
 #[non_exhaustive]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
 pub enum Operation {
-    /// Check if a file exists.
+    /// Checks if a file exists.
     Exists,
 
-    /// Read a file.
+    /// Reads a file.
     Read,
 
-    /// Write a file.
+    /// Writes a file.
     Write,
 
-    /// Delete a file.
+    /// Deletes a file.
     Delete,
 
-    /// List the files in a folder.
+    /// Lists the files in a folder.
     ListFiles,
 
-    /// Delete the files in a folder.
+    /// Deletes the files in a folder.
     DeleteFiles,
 
-    /// Modify a path.
-    ModifyPath,
+    /// Converts a path to a file path or a folder path.
+    ConvertPath,
 }
 
 impl Display for Operation {
@@ -35,8 +36,28 @@ impl Display for Operation {
             Operation::Delete => "delete",
             Operation::ListFiles => "list-files",
             Operation::DeleteFiles => "delete-files",
-            Operation::ModifyPath => "modify-path",
+            Operation::ConvertPath => "convert-path",
         };
         f.write_str(s)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Operation;
+
+    #[test]
+    fn display() {
+        for (operation, expected) in [
+            (Operation::Exists, "exists"),
+            (Operation::Read, "read"),
+            (Operation::Write, "write"),
+            (Operation::Delete, "delete"),
+            (Operation::ListFiles, "list-files"),
+            (Operation::DeleteFiles, "delete-files"),
+            (Operation::ConvertPath, "convert-path"),
+        ] {
+            assert_eq!(operation.to_string(), expected);
+        }
     }
 }

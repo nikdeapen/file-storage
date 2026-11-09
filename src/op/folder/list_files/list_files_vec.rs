@@ -3,50 +3,61 @@ use crate::{Error, FilePath, FolderPath, ListFilesOp};
 impl FolderPath {
     //! List Files as Vec
 
-    /// Lists the files in the folder as a `Vec<FilePath>` sorted in lexicographical order.
+    /// Lists the files in the folder as a sorted `Vec`.
     ///
-    /// Returns `Ok(sorted_files)`.
+    /// # Note
+    /// - See `list_files` for which files are listed and how they are sorted.
     pub fn list_files_as_vec(&self) -> Result<Vec<FilePath>, Error> {
-        let mut vec: Vec<FilePath> = Vec::default();
-        self.list_files_to_vec(&mut vec)?;
-        Ok(vec)
+        let mut target: Vec<FilePath> = Vec::default();
+        self.list_files_to_vec(&mut target)?;
+        Ok(target)
     }
 
-    /// Lists the files as a `Vec<FilePath>`.
+    /// Lists the files in the folder as a `Vec` in any order.
     ///
-    /// Returns `Ok(files)`.
+    /// # Note
+    /// - See `list_files` for which files are listed.
     pub fn list_files_as_vec_unsorted(&self) -> Result<Vec<FilePath>, Error> {
-        let mut target: Vec<FilePath> = Vec::new();
+        let mut target: Vec<FilePath> = Vec::default();
         self.list_files_to_vec_unsorted(&mut target)?;
         Ok(target)
     }
 
-    /// Lists the files from the folder and appends them to the `target` `Vec`.
-    ///
-    /// Returns `Ok(file_count)`.
+    /// Lists the files in the folder to the end of the `target` `Vec`.
     ///
     /// # Note
-    /// Only the appended files will be sorted, not the entire `target`.
+    /// - It returns the number of files listed.
+    /// - Only the listed files are sorted, not the whole `target`. See `list_files`.
+    /// - On error the `target` is left as it was.
     pub fn list_files_to_vec(&self, target: &mut Vec<FilePath>) -> Result<usize, Error> {
-        let mut count: usize = 0;
-        let files: ListFilesOp = self.list_files()?;
-        for file in files {
-            target.push(file?);
-            count += 1;
-        }
-        Ok(count)
+        self.append_files(self.list_files()?, target)
     }
 
-    /// Lists the files to the `target` `Vec`.
+    /// Lists the files in the folder to the end of the `target` `Vec` in any order.
     ///
-    /// Returns `Ok(file_count)`.
+    /// # Note
+    /// - It returns the number of files listed. See `list_files`.
+    /// - On error the `target` is left as it was.
     pub fn list_files_to_vec_unsorted(&self, target: &mut Vec<FilePath>) -> Result<usize, Error> {
-        let mut count: usize = 0;
-        let files: ListFilesOp = self.list_files_unsorted()?;
+        self.append_files(self.list_files_unsorted()?, target)
+    }
+
+    /// Appends the `files` to the `target`.
+    ///
+    /// # Note
+    /// - It returns the number of files appended.
+    /// - On error the `target` is cut back to its original length.
+    fn append_files(&self, files: ListFilesOp, target: &mut Vec<FilePath>) -> Result<usize, Error> {
+        let original_len: usize = target.len();
         for file in files {
-            target.push(file?);
-            count += 1;
+            match file {
+                Ok(file) => target.push(file),
+                Err(error) => {
+                    target.truncate(original_len);
+                    return Err(error);
+                }
+            }
         }
-        Ok(count)
+        Ok(target.len() - original_len)
     }
 }

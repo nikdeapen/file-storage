@@ -1,4 +1,5 @@
 use crate::system::r2::r2_path::RUNTIME;
+use crate::system::r2::sdk_message;
 use crate::system::R2Path;
 use crate::Operation::ListFiles;
 use crate::{Error, FilePath, FolderPath, StoragePath};
@@ -10,9 +11,13 @@ use aws_sdk_s3::Client;
 use aws_smithy_async::future::pagination_stream::PaginationStream;
 
 /// An R2 list-files operation.
-pub struct R2ListFilesOp {
+pub(crate) struct R2ListFilesOp {
     root: FolderPath,
-    base_url: String,
+
+    /// The bucket's root folder. Each key is appended to it.
+    bucket_root: StoragePath,
+
+    /// The files left from the current page, in reverse order.
     files: Vec<FilePath>,
     finished: bool,
     paginator:
@@ -22,8 +27,11 @@ pub struct R2ListFilesOp {
 impl R2ListFilesOp {
     //! Construction
 
-    /// Creates a new list-files operation.
-    pub async fn from_async(root: FolderPath, path: R2Path<'_>) -> Result<Self, Error> {
+    /// Creates the [R2ListFilesOp].
+    pub(in crate::system::r2) async fn from_async(path: R2Path<'_>) -> Result<Self, Error> {
+        let root: FolderPath = path.path.clone().to_folder()?;
+        let bucket_root: StoragePath = StoragePath::parse(root.base_path())
+            .map_err(|e| Error::from_source(root.clone(), ListFiles, e))?;
         let client: Client = R2Path::get_client(path.account_id).await;
         let paginator: PaginationStream<
             Result<ListObjectsV2Output, SdkError<ListObjectsV2Error, HttpResponse>>,
@@ -33,40 +41,12 @@ impl R2ListFilesOp {
             .prefix(path.key)
             .into_paginator()
             .send();
-        let base_url: String = format!(
-            "{}{}{}{}/",
-            R2Path::HTTPS_PREFIX,
-            path.account_id,
-            R2Path::R2_PREFIX,
-            path.bucket,
-        );
         Ok(Self {
             root,
-            base_url,
+            bucket_root,
             files: Vec::default(),
             finished: false,
             paginator,
-        })
-    }
-}
-
-impl R2ListFilesOp {
-    //! Conversions
-
-    /// Converts the `object` to a file path.
-    fn to_file(&self, object: Object) -> Result<FilePath, Error> {
-        let key: String = object.key.ok_or_else(|| {
-            Error::from_message(self.root.clone(), ListFiles, "missing object key")
-        })?;
-        let path: String = format!("{}{}", self.base_url, key);
-        let path: StoragePath = StoragePath::parse(path)
-            .map_err(|e| Error::from_source(self.root.clone(), ListFiles, e))?;
-        path.to_file().map_err(|error| {
-            Error::from_message(
-                self.root.clone(),
-                ListFiles,
-                format!("not a file path: {}", error.path()),
-            )
         })
     }
 }
@@ -76,21 +56,14 @@ impl R2ListFilesOp {
 
     /// Fetches the next page of results from R2.
     ///
-    /// Returns `Ok(true)` if a page was fetched.
-    /// Returns `Ok(false)` if there are no more pages.
+    /// # Note
+    /// - It is `true` if a page was fetched. It is `false` if there are no more pages.
+    /// - Keys ending with `/` are folder markers, not files. They are skipped.
     fn fetch_next_page(&mut self) -> Result<bool, Error> {
         RUNTIME.block_on(async {
-            let page = self
-                .paginator
-                .try_next()
-                .await
-                .map_err(|error| {
-                    Error::from_source(
-                        self.root.clone(),
-                        ListFiles,
-                        std::io::Error::other(error),
-                    )
-                })?;
+            let page = self.paginator.try_next().await.map_err(|error| {
+                Error::from_message(self.root.clone(), ListFiles, sdk_message(&error))
+            })?;
             let Some(page) = page else {
                 return Ok(false);
             };
@@ -98,12 +71,30 @@ impl R2ListFilesOp {
                 .contents
                 .unwrap_or_default()
                 .into_iter()
-                .map(|o| self.to_file(o))
+                .filter(|object| !object.key().is_some_and(|key| key.ends_with('/')))
+                .map(|object| self.to_file(object))
                 .collect::<Result<Vec<FilePath>, Error>>()?;
             files.reverse();
             self.files = files;
             Ok(true)
         })
+    }
+
+    /// Converts the `object` to a file path.
+    fn to_file(&self, object: Object) -> Result<FilePath, Error> {
+        let key: String = object.key.ok_or_else(|| {
+            Error::from_message(self.root.clone(), ListFiles, "missing object key")
+        })?;
+        self.bucket_root
+            .clone_append(&key)
+            .to_file()
+            .map_err(|error| {
+                Error::from_message(
+                    self.root.clone(),
+                    ListFiles,
+                    format!("not a file path: {}", error.path()),
+                )
+            })
     }
 }
 

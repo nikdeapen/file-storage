@@ -7,12 +7,12 @@ impl<'a> R2Path<'a> {
     //! Delete
 
     /// See `FilePath::delete`.
-    pub fn delete(self) -> Result<(), Error> {
+    pub(crate) fn delete(self) -> Result<(), Error> {
         RUNTIME.block_on(self.delete_async())
     }
 
     /// See `FilePath::delete`.
-    pub async fn delete_async(self) -> Result<(), Error> {
+    async fn delete_async(self) -> Result<(), Error> {
         let response = Self::get_client(self.account_id)
             .await
             .delete_object()
@@ -22,11 +22,7 @@ impl<'a> R2Path<'a> {
             .await;
         match response {
             Ok(_response) => Ok(()),
-            Err(error) => Err(Error::from_source(
-                self.path.clone(),
-                Delete,
-                std::io::Error::other(error),
-            )),
+            Err(error) => Err(self.sdk_error(Delete, error)),
         }
     }
 }

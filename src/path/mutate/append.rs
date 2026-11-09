@@ -4,11 +4,21 @@ impl StoragePath {
     //! Append
 
     /// Appends the `string`.
+    ///
+    /// # Note
+    /// - On a Windows path, each `/` is appended as `\`.
     pub fn append<S>(&mut self, string: S)
     where
         S: AsRef<str>,
     {
-        unsafe { self.path_mut() }.push_str(string.as_ref());
+        let string: &str = string.as_ref();
+        if self.file_separator() == '\\' {
+            for c in string.chars() {
+                self.append_char(c);
+            }
+        } else {
+            unsafe { self.path_mut() }.push_str(string);
+        }
     }
 
     /// Appends the `string`.
@@ -22,7 +32,8 @@ impl StoragePath {
 
     /// Clones the path and appends the `string`.
     ///
-    /// The result is the same as `path.clone().with_appended(s)` but with a single allocation.
+    /// # Note
+    /// - It allocates once. The result equals `path.clone().with_appended(string)`.
     pub fn clone_append<S>(&self, string: S) -> Self
     where
         S: AsRef<str>,
@@ -49,5 +60,25 @@ mod tests {
         let folder_path: StoragePath = StoragePath::unix_root().with_appended("folder/");
         let result: StoragePath = folder_path.with_appended("file.txt");
         assert_eq!(result.as_str(), "/folder/file.txt");
+    }
+
+    #[test]
+    fn append_windows_separators() {
+        let folder: StoragePath = StoragePath::parse("C:\\folder\\").unwrap();
+
+        let result: StoragePath = folder.clone().with_appended("sub/file.txt");
+        assert_eq!(result.as_str(), "C:\\folder\\sub\\file.txt");
+        let parsed: StoragePath = StoragePath::parse("C:\\folder\\sub/file.txt").unwrap();
+        assert_eq!(result, parsed);
+
+        let result: StoragePath = folder.clone_append("sub/");
+        assert_eq!(result.as_str(), "C:\\folder\\sub\\");
+        assert!(result.is_folder());
+    }
+
+    #[test]
+    fn append_unix_backslashes() {
+        let result: StoragePath = StoragePath::unix_root().with_appended("a\\b");
+        assert_eq!(result.as_str(), "/a\\b");
     }
 }

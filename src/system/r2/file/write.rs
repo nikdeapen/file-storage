@@ -1,10 +1,8 @@
 use crate::system::r2::r2_path::RUNTIME;
 use crate::system::{R2Path, R2WriteOp};
-use crate::Error;
-use crate::Headers;
 use crate::Operation::Write;
-use aws_sdk_s3::error::ProvideErrorMetadata;
-use aws_sdk_s3::error::SdkError;
+use crate::{Error, Headers};
+use aws_sdk_s3::error::{ProvideErrorMetadata, SdkError};
 use aws_sdk_s3::operation::put_object::builders::PutObjectFluentBuilder;
 use aws_sdk_s3::primitives::ByteStream;
 use bytes::Bytes;
@@ -13,13 +11,25 @@ impl<'a> R2Path<'a> {
     //! Write
 
     /// See `FilePath::write_if_not_exists`.
-    pub fn write_if_not_exists(self) -> Result<Option<R2WriteOp>, Error> {
+    pub(crate) fn write_if_not_exists(self) -> Result<Option<R2WriteOp>, Error> {
         RUNTIME.block_on(self.write_if_not_exists_async())
     }
 
+    /// See `FilePath::write_data_if_not_exists`.
+    pub(crate) fn write_data_if_not_exists<D>(self, data: D) -> Result<bool, Error>
+    where
+        D: AsRef<[u8]>,
+    {
+        self.write_with_headers_if_not_exists(data, &Headers::new())
+    }
+
     /// See `FilePath::write_if_not_exists`.
+    ///
+    /// # Note
+    /// - The check here only finds an existing file early. The atomic step is in `close`, which
+    ///   completes the upload only if the file still does not exist.
     async fn write_if_not_exists_async(self) -> Result<Option<R2WriteOp>, Error> {
-        if self.exists_async().await? {
+        if self.has_file(Write).await? {
             return Ok(None);
         }
         let op: R2WriteOp = R2WriteOp::create(self.account_id, self.bucket, self.key)
@@ -27,51 +37,21 @@ impl<'a> R2Path<'a> {
             .map_err(|e| Error::from_source(self.path.clone(), Write, e))?;
         Ok(Some(op))
     }
-
-    /// See `FilePath::write_data_if_not_exists`.
-    pub fn write_data_if_not_exists<D>(self, data: D) -> Result<bool, Error>
-    where
-        D: AsRef<[u8]>,
-    {
-        self.write_with_headers_if_not_exists(data, &Headers::default())
-    }
-
-    /// See `FilePath::write_data_if_not_exists`.
-    pub async fn write_data_if_not_exists_async<D>(self, data: D) -> Result<bool, Error>
-    where
-        D: AsRef<[u8]>,
-    {
-        self.write_with_headers_if_not_exists_async(data.as_ref(), &Headers::default())
-            .await
-    }
 }
 
 impl<'a> R2Path<'a> {
-    //! Write: Headers
+    //! Write With Headers
 
-    /// See `FilePath::write_with_headers`.
-    pub fn write_with_headers<D>(self, data: D, headers: &Headers) -> Result<(), Error>
+    /// See `FilePath::overwrite_with_headers`.
+    pub(crate) fn overwrite_with_headers<D>(self, data: D, headers: &Headers) -> Result<(), Error>
     where
         D: AsRef<[u8]>,
     {
-        RUNTIME.block_on(self.write_with_headers_async(data.as_ref(), headers))
-    }
-
-    /// See `FilePath::write_with_headers`.
-    pub async fn write_with_headers_async(self, data: &[u8], headers: &Headers) -> Result<(), Error> {
-        let request: PutObjectFluentBuilder = self.put_request(data, headers).await;
-        match request.send().await {
-            Ok(_response) => Ok(()),
-            Err(error) => Err(Error::from_source(
-                self.path.clone(),
-                Write,
-                std::io::Error::other(error),
-            )),
-        }
+        RUNTIME.block_on(self.overwrite_with_headers_async(data.as_ref(), headers))
     }
 
     /// See `FilePath::write_with_headers_if_not_exists`.
-    pub fn write_with_headers_if_not_exists<D>(
+    pub(crate) fn write_with_headers_if_not_exists<D>(
         self,
         data: D,
         headers: &Headers,
@@ -82,35 +62,41 @@ impl<'a> R2Path<'a> {
         RUNTIME.block_on(self.write_with_headers_if_not_exists_async(data.as_ref(), headers))
     }
 
+    /// See `FilePath::overwrite_with_headers`.
+    async fn overwrite_with_headers_async(
+        self,
+        data: &[u8],
+        headers: &Headers,
+    ) -> Result<(), Error> {
+        match self.put_request(data, headers).await.send().await {
+            Ok(_output) => Ok(()),
+            Err(error) => Err(self.sdk_error(Write, error)),
+        }
+    }
+
     /// See `FilePath::write_with_headers_if_not_exists`.
-    pub async fn write_with_headers_if_not_exists_async(
+    async fn write_with_headers_if_not_exists_async(
         self,
         data: &[u8],
         headers: &Headers,
     ) -> Result<bool, Error> {
-        let request: PutObjectFluentBuilder = self
-            .put_request(data, headers)
-            .await
-            .set_if_none_match(Some("*".to_string()));
+        let request: PutObjectFluentBuilder =
+            self.put_request(data, headers).await.if_none_match("*");
         match request.send().await {
-            Ok(_response) => Ok(true),
+            Ok(_output) => Ok(true),
             Err(SdkError::ServiceError(error))
                 if error.err().code() == Some("PreconditionFailed") =>
             {
                 Ok(false)
             }
-            Err(error) => Err(Error::from_source(
-                self.path.clone(),
-                Write,
-                std::io::Error::other(error),
-            )),
+            Err(error) => Err(self.sdk_error(Write, error)),
         }
     }
 
-    /// Builds a `put_object` request with the `data` body and `headers` applied.
+    /// Builds a `put_object` request with the `data` body and the `headers`.
     ///
-    /// Recognized response headers map to their typed setters; any others are set as object
-    /// metadata.
+    /// # Note
+    /// - Known headers map to their typed setters. Any others become object metadata.
     async fn put_request(self, data: &[u8], headers: &Headers) -> PutObjectFluentBuilder {
         let body: ByteStream = ByteStream::from(Bytes::copy_from_slice(data));
         let mut request: PutObjectFluentBuilder = Self::get_client(self.account_id)
@@ -120,13 +106,19 @@ impl<'a> R2Path<'a> {
             .key(self.key)
             .body(body);
         for (name, value) in headers.iter() {
-            request = match name.to_ascii_lowercase().as_str() {
-                "content-type" => request.content_type(value),
-                "cache-control" => request.cache_control(value),
-                "content-encoding" => request.content_encoding(value),
-                "content-disposition" => request.content_disposition(value),
-                "content-language" => request.content_language(value),
-                _ => request.metadata(name, value),
+            let is = |known: &str| name.eq_ignore_ascii_case(known);
+            request = if is("content-type") {
+                request.content_type(value)
+            } else if is("cache-control") {
+                request.cache_control(value)
+            } else if is("content-encoding") {
+                request.content_encoding(value)
+            } else if is("content-disposition") {
+                request.content_disposition(value)
+            } else if is("content-language") {
+                request.content_language(value)
+            } else {
+                request.metadata(name, value)
             };
         }
         request

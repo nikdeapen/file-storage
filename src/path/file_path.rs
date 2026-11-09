@@ -1,6 +1,7 @@
 use crate::StoragePath;
 
 /// A file path.
+#[must_use]
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
 pub struct FilePath {
     path: StoragePath,
@@ -9,10 +10,10 @@ pub struct FilePath {
 impl FilePath {
     //! Construction
 
-    /// Creates a file path from the `path`.
+    /// Creates the [FilePath].
     ///
     /// # Safety
-    /// The `path` must be a valid file path.
+    /// - The `path` must be a file path. See `StoragePath::is_file`.
     pub unsafe fn new(path: StoragePath) -> Self {
         Self { path }
     }

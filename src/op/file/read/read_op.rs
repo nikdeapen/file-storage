@@ -1,18 +1,21 @@
+use crate::LocalReadOp;
+#[cfg(feature = "r2")]
+use crate::R2ReadOp;
 use std::io::Read;
 
 /// A read operation.
 pub struct ReadOp {
-    pub(crate) inner: ReadOpInner,
+    pub(in crate::op) inner: ReadOpInner,
 }
 
 /// A file-system-specific read operation.
-pub(crate) enum ReadOpInner {
+pub(in crate::op) enum ReadOpInner {
     /// A local read operation.
-    Local(crate::LocalReadOp),
+    Local(LocalReadOp),
 
-    /// A cloudflare R2 read operation.
+    /// A Cloudflare R2 read operation.
     #[cfg(feature = "r2")]
-    R2(crate::R2ReadOp),
+    R2(R2ReadOp),
 }
 
 impl Read for ReadOp {

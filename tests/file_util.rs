@@ -1,23 +1,33 @@
-use file_storage::{FilePath, ReadOp, WriteOp};
+use file_storage::{FilePath, Headers, ReadOp, Reason, WriteOp};
 use std::error::Error;
 use std::io::{Read, Write};
 
-// Tests the operations on the `file`.
-pub fn test_file(
-    file: &FilePath,
-    test_delete_if_exists: bool,
-    test_write: bool,
-) -> Result<(), Box<dyn Error>> {
+/// Tests the operations on the `file`.
+pub fn test_file(file: &FilePath, test_delete_if_exists: bool) -> Result<(), Box<dyn Error>> {
     exists(file)?;
     delete(file, test_delete_if_exists)?;
     read(file)?;
     read_string(file)?;
     read_vec(file)?;
-    if test_write {
-        write(file)?;
-        write_if_not_exists(file)?;
-    }
+    read_errors(file)?;
+    write(file)?;
+    write_nothing(file)?;
+    write_if_not_exists(file)?;
+    write_appears_at_close(file)?;
+    write_loses_a_race_at_close(file)?;
     write_data(file)?;
+    write_with_headers(file)?;
+    Ok(())
+}
+
+/// Tests closing a `write` on the `file` without writing anything.
+fn write_nothing(file: &FilePath) -> Result<(), Box<dyn Error>> {
+    file.delete()?;
+
+    file.write()?.close()?;
+    assert!(file.exists()?);
+    assert!(file.read_as_vec()?.is_empty());
+
     Ok(())
 }
 
@@ -86,6 +96,10 @@ fn read_string(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.read_to_string(&mut result)?;
     assert_eq!(result, s);
 
+    let mut result: String = "> ".to_string();
+    assert_eq!(file.read_to_string(&mut result)?, s.len());
+    assert_eq!(result, format!("> {s}"));
+
     Ok(())
 }
 
@@ -103,10 +117,41 @@ fn read_vec(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.read_to_vec(&mut result)?;
     assert_eq!(result, s.as_bytes());
 
+    let mut result: Vec<u8> = b"> ".to_vec();
+    assert_eq!(file.read_to_vec(&mut result)?, s.len());
+    assert_eq!(result, format!("> {s}").into_bytes());
+
     Ok(())
 }
 
-/// Test the `write` function on the `file`.
+/// Tests the `read` functions on the `file` when they fail.
+fn read_errors(file: &FilePath) -> Result<(), Box<dyn Error>> {
+    file.delete()?;
+
+    // A missing file fails and leaves the target as it was.
+    let error: file_storage::Error = file.read().err().ok_or("read found a missing file")?;
+    assert_eq!(error.reason(), Reason::FileNotFound);
+    let mut vec: Vec<u8> = b"keep".to_vec();
+    let error: file_storage::Error = file.read_to_vec(&mut vec).unwrap_err();
+    assert_eq!(error.reason(), Reason::FileNotFound);
+    assert_eq!(vec, b"keep");
+    let mut string: String = "keep".to_string();
+    let error: file_storage::Error = file.read_to_string(&mut string).unwrap_err();
+    assert_eq!(error.reason(), Reason::FileNotFound);
+    assert_eq!(string, "keep");
+
+    // Content that is not UTF-8 fails and leaves the target as it was.
+    file.write_data([0xff, 0xfe])?;
+    let error: file_storage::Error = file.read_as_string().unwrap_err();
+    assert_eq!(error.reason(), Reason::FileContentNotUtf8);
+    let error: file_storage::Error = file.read_to_string(&mut string).unwrap_err();
+    assert_eq!(error.reason(), Reason::FileContentNotUtf8);
+    assert_eq!(string, "keep");
+
+    Ok(())
+}
+
+/// Tests the `write` function on the `file`.
 fn write(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
@@ -122,7 +167,7 @@ fn write(file: &FilePath) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-/// Test the `write_if_not_exists` function on the `file`.
+/// Tests the `write_if_not_exists` function on the `file`.
 fn write_if_not_exists(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
@@ -142,7 +187,7 @@ fn write_if_not_exists(file: &FilePath) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-/// Test the `write_data` function on the `file`.
+/// Tests the `write_data` function on the `file`.
 fn write_data(file: &FilePath) -> Result<(), Box<dyn Error>> {
     file.delete()?;
 
@@ -150,6 +195,67 @@ fn write_data(file: &FilePath) -> Result<(), Box<dyn Error>> {
 
     file.write_data(s)?;
     assert_eq!(file.read_as_string()?, s);
+    let error: file_storage::Error = file.write_data(s).unwrap_err();
+    assert_eq!(error.reason(), Reason::FileAlreadyExists);
+
+    Ok(())
+}
+
+/// Tests the `write_with_headers` and `overwrite_with_headers` functions on the `file`.
+fn write_with_headers(file: &FilePath) -> Result<(), Box<dyn Error>> {
+    file.delete()?;
+
+    let headers: Headers = Headers::new().with_header("Content-Type", "text/plain");
+
+    // An overwrite creates a missing file.
+    file.overwrite_with_headers("new", &headers)?;
+    assert_eq!(file.read_as_string()?, "new");
+    file.delete()?;
+
+    file.write_with_headers("first", &headers)?;
+    let reason: Reason = file
+        .write_with_headers("second", &headers)
+        .unwrap_err()
+        .reason();
+    assert_eq!(reason, Reason::FileAlreadyExists);
+    assert!(!file.write_with_headers_if_not_exists("second", &headers)?);
+    assert_eq!(file.read_as_string()?, "first");
+
+    file.overwrite_with_headers("second", &headers)?;
+    assert_eq!(file.read_as_string()?, "second");
+
+    Ok(())
+}
+
+/// Tests that a create-only write appears at `close` and a dropped one never does.
+fn write_appears_at_close(file: &FilePath) -> Result<(), Box<dyn Error>> {
+    file.delete()?;
+
+    let mut write: WriteOp = file.write()?;
+    write.write_all(b"data")?;
+    assert!(!file.exists()?);
+    drop(write);
+    assert!(!file.exists()?);
+
+    let mut write: WriteOp = file.write()?;
+    write.write_all(b"data")?;
+    write.close()?;
+    assert_eq!(file.read_as_string()?, "data");
+
+    Ok(())
+}
+
+/// Tests that a create-only write that loses a race fails at `close`.
+fn write_loses_a_race_at_close(file: &FilePath) -> Result<(), Box<dyn Error>> {
+    file.delete()?;
+
+    // Another writer creates the file while the streaming write is open.
+    let mut write: WriteOp = file.write()?;
+    write.write_all(b"late")?;
+    file.write_data("first")?;
+    let error: file_storage::Error = write.close().unwrap_err();
+    assert_eq!(error.reason(), Reason::FileAlreadyExists);
+    assert_eq!(file.read_as_string()?, "first");
 
     Ok(())
 }

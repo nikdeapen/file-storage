@@ -3,18 +3,19 @@ use crate::{Error, FilePath};
 impl FilePath {
     //! Write Empty
 
-    /// Writes an empty file.
+    /// Writes a new empty file.
     ///
-    /// Returns `Ok(())`.
-    /// Returns `Err(FileAlreadyExists)` if the file already exists.
+    /// # Note
+    /// - It fails with `FileAlreadyExists` if the file already exists. See `write_data`.
     pub fn write_empty(&self) -> Result<(), Error> {
         self.write_data(b"")
     }
 
-    /// Writes an empty file if the file does not exist.
+    /// Writes a new empty file if the file does not exist.
     ///
-    /// Returns `Ok(true)` if the file was written.
-    /// Returns `Ok(false)` if the file already exists.
+    /// # Note
+    /// - It is `true` if the file was written. It is `false` if the file already exists.
+    /// - See `write_data_if_not_exists`.
     pub fn write_empty_if_not_exists(&self) -> Result<bool, Error> {
         self.write_data_if_not_exists(b"")
     }

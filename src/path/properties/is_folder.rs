@@ -1,7 +1,7 @@
 use crate::StoragePath;
 
 impl StoragePath {
-    //! Is-Folder
+    //! Is Folder
 
     /// Checks if the path is a folder. (if not, the path is a file)
     pub fn is_folder(&self) -> bool {

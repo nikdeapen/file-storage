@@ -10,7 +10,10 @@ impl StoragePath {
 
     /// Checks if the `path` is a Windows path.
     ///
-    /// Matches drive letter paths (`C:\` or `C:/`) and UNC paths (`\\server\...`).
+    /// # Note
+    /// - A drive letter path starts like `C:\` or `C:/`.
+    /// - A UNC path starts like `\\server`.
+    /// - It only checks how the path starts. `parse` can still reject it.
     pub fn is_windows_path_str<S>(path: S) -> bool
     where
         S: AsRef<str>,
@@ -23,8 +26,7 @@ impl StoragePath {
         let is_drive_letter: bool = bytes[0].is_ascii_alphabetic()
             && bytes[1] == b':'
             && (bytes[2] == b'\\' || bytes[2] == b'/');
-        let is_unc: bool =
-            bytes[0] == b'\\' && bytes[1] == b'\\' && bytes[2] != b'\\';
+        let is_unc: bool = bytes[0] == b'\\' && bytes[1] == b'\\' && bytes[2] != b'\\';
         is_drive_letter || is_unc
     }
 }
@@ -39,6 +41,7 @@ mod tests {
         assert!(StoragePath::is_windows_path_str("C:\\"));
         assert!(StoragePath::is_windows_path_str("C:/"));
         assert!(StoragePath::is_windows_path_str("D:\\folder\\file"));
+        assert!(StoragePath::is_windows_path_str("c:\\"));
 
         // UNC paths.
         assert!(StoragePath::is_windows_path_str("\\\\server\\share"));
@@ -49,5 +52,13 @@ mod tests {
         assert!(!StoragePath::is_windows_path_str("C:"));
         assert!(!StoragePath::is_windows_path_str("\\\\\\bad"));
         assert!(!StoragePath::is_windows_path_str("ab"));
+    }
+
+    #[test]
+    fn is_windows_path_str_does_not_validate() {
+        for path in ["\\\\server", "\\\\?\\C:\\folder", "\\\\/server"] {
+            assert!(StoragePath::is_windows_path_str(path), "{path}");
+            assert!(StoragePath::parse(path).is_err(), "{path}");
+        }
     }
 }

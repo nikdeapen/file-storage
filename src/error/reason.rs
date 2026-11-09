@@ -1,28 +1,29 @@
 use std::fmt::{Display, Formatter};
 
 /// The reason for a path operation error.
-#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
+#[must_use]
 #[non_exhaustive]
+#[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug)]
 pub enum Reason {
-    /// The file system could not be resolved for the path.
+    /// No backend on this host handles the path, such as a Windows path on Unix.
     UnknownFileSystem,
 
-    /// The file system does not support the operation.
+    /// The backend cannot do the operation, such as an atomic delete on Cloudflare R2.
     UnsupportedOperation,
 
-    /// The file was not found.
+    /// The file does not exist.
     FileNotFound,
 
     /// The file already exists.
     FileAlreadyExists,
 
-    /// The file content was not properly encoded UTF-8.
-    FileContentNotUTF8,
+    /// The file's content is not UTF-8.
+    FileContentNotUtf8,
 
-    /// The path is invalid for the operation.
+    /// The path is the wrong kind, such as a folder path where a file path is needed.
     InvalidPath,
 
-    /// Another uncategorized reason.
+    /// Any other reason. The IO source holds the details.
     Other,
 }
 
@@ -33,10 +34,30 @@ impl Display for Reason {
             Reason::UnsupportedOperation => "unsupported operation",
             Reason::FileNotFound => "file not found",
             Reason::FileAlreadyExists => "file already exists",
-            Reason::FileContentNotUTF8 => "file content not utf-8",
+            Reason::FileContentNotUtf8 => "file content not utf-8",
             Reason::InvalidPath => "invalid path",
             Reason::Other => "other",
         };
         f.write_str(s)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::Reason;
+
+    #[test]
+    fn display() {
+        for (reason, expected) in [
+            (Reason::UnknownFileSystem, "unknown file system"),
+            (Reason::UnsupportedOperation, "unsupported operation"),
+            (Reason::FileNotFound, "file not found"),
+            (Reason::FileAlreadyExists, "file already exists"),
+            (Reason::FileContentNotUtf8, "file content not utf-8"),
+            (Reason::InvalidPath, "invalid path"),
+            (Reason::Other, "other"),
+        ] {
+            assert_eq!(reason.to_string(), expected);
+        }
     }
 }

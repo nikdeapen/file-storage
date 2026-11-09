@@ -1,14 +1,15 @@
 #![doc = include_str!("../README.md")]
-#![allow(clippy::module_inception)]
 
 pub use error::*;
-pub use headers::*;
 pub use op::*;
 pub use path::*;
-pub use system::*;
+pub use util::*;
 
 mod error;
-mod headers;
 mod op;
 mod path;
+mod util;
+
+use system::*;
+
 mod system;
