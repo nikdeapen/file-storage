@@ -18,7 +18,7 @@ The tag denotes the section of the codebase the commit is relevant to.
 
 The crate:
 
-- `[*]`: changes across multiple parts of the crate crate.
+- `[*]`: changes across multiple parts of the crate.
 - `[cargo]`: the crate, typically anything focused outside the `src` folder.
 
 The sections:
